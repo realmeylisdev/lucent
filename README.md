@@ -19,7 +19,7 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Native keyboard + trackpad lock | ✅ builds/runs | ✅ builds in CI¹ | ✅ builds in CI¹ |
 | Hold-to-unlock (native gesture + progress ring) | ✅ | ✅¹ | ✅¹ |
 | Fullscreen black cleaning mode | ✅ | ✅ | ✅ |
-| Display test patterns (smudge / dead-pixel) | ✅ | ✅ | ✅ |
+| Display Lab — 26 test patterns + dead/stuck-pixel fixer | ✅ | ✅ | ✅ |
 | Brightness boost (`screen_brightness`) | ✅ | ✅ | ⚠️ no-op (unsupported) |
 | Accessibility permission onboarding | ✅ | n/a | n/a |
 | Settings (persisted) | ✅ | ✅ | ✅ |
@@ -34,7 +34,7 @@ borderless black `NSWindow` per `NSScreen`). Windows/Linux are deferred and need
 their own native cover windows. The input lock already covers **all** displays
 regardless — this is purely visual.
 ³ Activated at the app root (`AppShell`): a menu-bar / tray item (Start Cleaning
-/ Display Test / Settings / Quit) and a global start-cleaning hotkey. Verified on
+/ Display Lab / Settings / Quit) and a global start-cleaning hotkey. Verified on
 macOS; Windows/Linux pending an on-platform check.
 
 macOS builds & runs; `flutter analyze` is clean under `very_good_analysis`; unit
@@ -48,13 +48,13 @@ lib/
   app/            App widget, theme, bootstrap (DI)
   core/
     constants/    channel + method names (the InputLock contract)
-    models/       UnlockKey, TestPattern
+    models/       UnlockKey
     platform/     NativeLockController (MethodChannel + EventChannel facade)
     services/     MultiMonitorCover, Brightness, AutoStart, Hotkey, Tray
   features/
     home/         landing screen
     cleaning/     fullscreen clean mode + cubit + unlock ring
-    display_test/ test patterns + cubit
+    display_lab/  26 test patterns (8 categories) + dead/stuck-pixel fixer
     settings/     persisted settings cubit + repository + model
     accessibility/ macOS permission onboarding
 ```

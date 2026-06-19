@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/view/cleaning_page.dart';
-import 'package:lucent/features/display_test/view/display_test_page.dart';
+import 'package:lucent/features/display_lab/view/display_lab_page.dart';
 import 'package:lucent/features/home/widgets/accessibility_card.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
 import 'package:lucent/features/settings/view/settings_page.dart';
 
 /// Landing screen: brand mark, the headline selling point (what the lock
-/// blocks), a big Start Cleaning button, Display Test, Settings, and (macOS)
+/// blocks), a big Start Cleaning button, Display Lab, Settings, and (macOS)
 /// the Accessibility-permission status with guided onboarding.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -89,9 +89,9 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: () =>
-                          Navigator.of(context).push(DisplayTestPage.route()),
-                      icon: const Icon(Icons.gradient_outlined),
-                      label: const Text('Display Test'),
+                          Navigator.of(context).push(DisplayLabPage.route()),
+                      icon: const Icon(Icons.tune),
+                      label: const Text('Display Lab'),
                     ),
                     const SizedBox(height: 8),
                     TextButton.icon(

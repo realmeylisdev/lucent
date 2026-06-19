@@ -9,7 +9,7 @@ import 'package:lucent/core/services/tray_service.dart';
 import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/view/cleaning_page.dart';
-import 'package:lucent/features/display_test/view/display_test_page.dart';
+import 'package:lucent/features/display_lab/view/display_lab_page.dart';
 import 'package:lucent/features/home/view/home_page.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
 import 'package:lucent/features/settings/view/settings_page.dart';
@@ -48,7 +48,7 @@ class _AppShellState extends State<AppShell> {
     await _tray!.init(
       TrayCallbacks(
         onStartCleaning: _startCleaning,
-        onDisplayTest: _openDisplayTest,
+        onDisplayLab: _openDisplayLab,
         onSettings: _openSettings,
         onQuit: _quit,
       ),
@@ -87,11 +87,11 @@ class _AppShellState extends State<AppShell> {
     await Navigator.of(context).push(CleaningPage.route());
   }
 
-  Future<void> _openDisplayTest() async {
+  Future<void> _openDisplayLab() async {
     if (!mounted) return;
     await windowManager.show();
     if (!mounted) return;
-    await Navigator.of(context).push(DisplayTestPage.route());
+    await Navigator.of(context).push(DisplayLabPage.route());
   }
 
   Future<void> _openSettings() async {

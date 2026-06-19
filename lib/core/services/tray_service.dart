@@ -6,13 +6,13 @@ import 'package:tray_manager/tray_manager.dart';
 class TrayCallbacks {
   const TrayCallbacks({
     required this.onStartCleaning,
-    required this.onDisplayTest,
+    required this.onDisplayLab,
     required this.onSettings,
     required this.onQuit,
   });
 
   final Future<void> Function() onStartCleaning;
-  final Future<void> Function() onDisplayTest;
+  final Future<void> Function() onDisplayLab;
   final Future<void> Function() onSettings;
   final Future<void> Function() onQuit;
 }
@@ -22,7 +22,7 @@ class TrayService with TrayListener {
   TrayCallbacks? _callbacks;
 
   static const _startKey = 'start_cleaning';
-  static const _testKey = 'display_test';
+  static const _labKey = 'display_lab';
   static const _settingsKey = 'settings';
   static const _quitKey = 'quit';
 
@@ -38,7 +38,7 @@ class TrayService with TrayListener {
       Menu(
         items: [
           MenuItem(key: _startKey, label: 'Start Cleaning'),
-          MenuItem(key: _testKey, label: 'Display Test'),
+          MenuItem(key: _labKey, label: 'Display Lab'),
           MenuItem.separator(),
           MenuItem(key: _settingsKey, label: 'Settings'),
           MenuItem.separator(),
@@ -58,8 +58,8 @@ class TrayService with TrayListener {
     switch (menuItem.key) {
       case _startKey:
         unawaited(cb.onStartCleaning());
-      case _testKey:
-        unawaited(cb.onDisplayTest());
+      case _labKey:
+        unawaited(cb.onDisplayLab());
       case _settingsKey:
         unawaited(cb.onSettings());
       case _quitKey:
