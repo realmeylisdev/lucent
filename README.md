@@ -23,16 +23,16 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Brightness boost (`screen_brightness`) | ✅ | ✅ | ⚠️ no-op (unsupported) |
 | Accessibility permission onboarding | ✅ | n/a | n/a |
 | Settings (persisted) | ✅ | ✅ | ✅ |
-| Multi-monitor **visual** blackout | ✅ native (NSWindow/screen) | ⏳ deferred² | ⏳² |
+| Multi-monitor **visual** blackout | ✅ native | ✅ native² | ✅ native² |
 | Menu-bar / tray + global hotkey | ✅ | ✅³ | ✅³ |
 
 ¹ Windows & Linux native input-lock now **compiles in CI** on real Windows /
 Linux runners (`WH_KEYBOARD_LL`; X11 `XGrabKeyboard` + Wayland shortcut-inhibit).
 Runtime behavior on those platforms is not yet interactively verified.
-² macOS blacks out every non-main display natively (`MonitorCoverPlugin` → one
-borderless black `NSWindow` per `NSScreen`). Windows/Linux are deferred and need
-their own native cover windows. The input lock already covers **all** displays
-regardless — this is purely visual.
+² Every non-primary display is blacked out by a native cover window per platform:
+macOS `NSWindow`, Windows Win32 (`EnumDisplayMonitors`), Linux `GtkWindow` (X11
+positions precisely; Wayland degrades — absolute placement is compositor-
+restricted). Build-verified on all three via CI; runtime-verified on macOS.
 ³ Activated at the app root (`AppShell`): a menu-bar / tray item (Start Cleaning
 / Display Lab / Settings / Quit) and a global start-cleaning hotkey. Verified on
 macOS; Windows/Linux pending an on-platform check.
