@@ -1,0 +1,32 @@
+name: lucent
+description: "Lucent — a cross-platform desktop screen-cleaning utility with a real native OS-level input lock."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.44.0'
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  equatable: ^2.0.8
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  hotkey_manager: ^0.2.3
+  launch_at_startup: ^0.5.1
+  package_info_plus: ^9.0.1
+  screen_brightness: ^2.1.11
+  shared_preferences: ^2.5.5
+  tray_manager: ^0.5.3
+  window_manager: ^0.5.1
+
+dev_dependencies:
+  bloc_test: ^10.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
+  very_good_analysis: ^10.3.0
+
+flutter:
+  uses-material-design: true

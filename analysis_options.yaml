@@ -1,0 +1,18 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    # Generated/desktop-platform plugin warnings we accept at the shell layer.
+    public_member_api_docs: ignore
+
+linter:
+  rules:
+    # Cubits expose mutable controllers internally; allow targeted relaxations.
+    flutter_style_todos: false
+    # Cubit setters are wired directly to Flutter `onChanged(bool)` callbacks as
+    # tear-offs (e.g. SwitchListTile.onChanged: cubit.setPointerLock); a named
+    # bool would break the ValueChanged<bool> contract, so allow positional.
+    avoid_positional_boolean_parameters: false

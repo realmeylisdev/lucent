@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Lucent ships OUTSIDE the Mac App Store as a notarized, hardened-runtime
+	  DMG. A CGEventTap requires Accessibility / Input-Monitoring trust
+	  (AXIsProcessTrusted), which is INCOMPATIBLE with the App Sandbox.
+	  Therefore com.apple.security.app-sandbox MUST be false / absent here.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<!-- Hardened Runtime is still required for notarization. -->
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<false/>
+</dict>
+</plist>
