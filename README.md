@@ -16,7 +16,7 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 
 | Capability | macOS | Windows | Linux |
 |---|---|---|---|
-| Native keyboard + trackpad lock | ✅ built & **builds/runs** | ✅ code in place¹ | ✅ code in place¹ |
+| Native keyboard + trackpad lock | ✅ builds/runs | ✅ builds in CI¹ | ✅ builds in CI¹ |
 | Hold-to-unlock (native gesture + progress ring) | ✅ | ✅¹ | ✅¹ |
 | Fullscreen black cleaning mode | ✅ | ✅ | ✅ |
 | Display test patterns (smudge / dead-pixel) | ✅ | ✅ | ✅ |
@@ -26,8 +26,9 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Multi-monitor **visual** blackout | ✅ native (NSWindow/screen) | ⏳ deferred² | ⏳² |
 | Menu-bar / tray + global hotkey | ✅ | ✅³ | ✅³ |
 
-¹ Windows/Linux native code matches the shared contract but has only been
-verified to build on macOS so far — build/run on those platforms to validate.
+¹ Windows & Linux native input-lock now **compiles in CI** on real Windows /
+Linux runners (`WH_KEYBOARD_LL`; X11 `XGrabKeyboard` + Wayland shortcut-inhibit).
+Runtime behavior on those platforms is not yet interactively verified.
 ² macOS blacks out every non-main display natively (`MonitorCoverPlugin` → one
 borderless black `NSWindow` per `NSScreen`). Windows/Linux are deferred and need
 their own native cover windows. The input lock already covers **all** displays
@@ -37,7 +38,8 @@ regardless — this is purely visual.
 macOS; Windows/Linux pending an on-platform check.
 
 macOS builds & runs; `flutter analyze` is clean under `very_good_analysis`; unit
-tests pass; CI runs analyze + test + a macOS build on every push.
+tests pass; CI builds **all three desktop platforms** (macOS, Windows, Linux) and
+runs analyze + tests on every push.
 
 ## Architecture (VGV, feature-first)
 
