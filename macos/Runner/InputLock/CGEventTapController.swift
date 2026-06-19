@@ -221,27 +221,27 @@ final class CGEventTapController {
       return false
     }
 
-    var mask: CGEventMask =
-      (1 << CGEventType.keyDown.rawValue) |
-      (1 << CGEventType.keyUp.rawValue) |
-      (1 << CGEventType.flagsChanged.rawValue) |
-      (1 << CGEventTapController.nxSysDefined.rawValue) // media / fn / brightness
-
+    // Build the mask from a typed list so the Swift type-checker never has to
+    // resolve a long `1 << … | 1 << …` literal chain — that trips the
+    // "expression too complex to type-check" limit on some Xcode versions.
+    var eventTypes: [CGEventType] = [
+      .keyDown, .keyUp, .flagsChanged,
+      CGEventTapController.nxSysDefined, // media / fn / brightness
+    ]
     if swallowPointer {
-      mask |=
-        (1 << CGEventType.leftMouseDown.rawValue) |
-        (1 << CGEventType.leftMouseUp.rawValue) |
-        (1 << CGEventType.rightMouseDown.rawValue) |
-        (1 << CGEventType.rightMouseUp.rawValue) |
-        (1 << CGEventType.otherMouseDown.rawValue) |
-        (1 << CGEventType.otherMouseUp.rawValue) |
-        (1 << CGEventType.leftMouseDragged.rawValue) |
-        (1 << CGEventType.rightMouseDragged.rawValue) |
-        (1 << CGEventType.otherMouseDragged.rawValue) |
-        (1 << CGEventType.scrollWheel.rawValue)
+      eventTypes += [
+        .leftMouseDown, .leftMouseUp,
+        .rightMouseDown, .rightMouseUp,
+        .otherMouseDown, .otherMouseUp,
+        .leftMouseDragged, .rightMouseDragged, .otherMouseDragged,
+        .scrollWheel,
+      ]
       if !allowMouseMove {
-        mask |= (1 << CGEventType.mouseMoved.rawValue)
+        eventTypes.append(.mouseMoved)
       }
+    }
+    let mask = eventTypes.reduce(CGEventMask(0)) { result, type in
+      result | (CGEventMask(1) << CGEventMask(type.rawValue))
     }
 
     // `refcon` carries an unmanaged pointer to self so the C callback can
