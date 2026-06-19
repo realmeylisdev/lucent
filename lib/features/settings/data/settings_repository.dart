@@ -19,6 +19,14 @@ class SettingsRepository {
   static const _kHotkey = 'hotkey';
   static const _kCleaningMode = 'cleaning_mode';
   static const _kGuidedWipe = 'guided_wipe';
+  static const _kPixelFixerMode = 'pixel_fixer_mode';
+  static const _kPixelFixerHz = 'pixel_fixer_hz';
+  static const _kPixelFixerRegionEnabled = 'pixel_fixer_region_enabled';
+  static const _kPixelFixerRegionLeft = 'pixel_fixer_region_left';
+  static const _kPixelFixerRegionTop = 'pixel_fixer_region_top';
+  static const _kPixelFixerRegionWidth = 'pixel_fixer_region_width';
+  static const _kPixelFixerRegionHeight = 'pixel_fixer_region_height';
+  static const _kPixelFixerAutoStopMinutes = 'pixel_fixer_auto_stop_minutes';
 
   LucentSettings _cache = LucentSettings.defaults;
 
@@ -50,6 +58,29 @@ class SettingsRepository {
       cleaningMode: CleaningMode.fromToken(_prefs.getString(_kCleaningMode)),
       guidedWipe:
           _prefs.getBool(_kGuidedWipe) ?? LucentSettings.defaults.guidedWipe,
+      pixelFixerMode:
+          _prefs.getString(_kPixelFixerMode) ??
+          LucentSettings.defaults.pixelFixerMode,
+      pixelFixerHz:
+          _prefs.getInt(_kPixelFixerHz) ?? LucentSettings.defaults.pixelFixerHz,
+      pixelFixerRegionEnabled:
+          _prefs.getBool(_kPixelFixerRegionEnabled) ??
+          LucentSettings.defaults.pixelFixerRegionEnabled,
+      pixelFixerRegionLeft:
+          _prefs.getInt(_kPixelFixerRegionLeft) ??
+          LucentSettings.defaults.pixelFixerRegionLeft,
+      pixelFixerRegionTop:
+          _prefs.getInt(_kPixelFixerRegionTop) ??
+          LucentSettings.defaults.pixelFixerRegionTop,
+      pixelFixerRegionWidth:
+          _prefs.getInt(_kPixelFixerRegionWidth) ??
+          LucentSettings.defaults.pixelFixerRegionWidth,
+      pixelFixerRegionHeight:
+          _prefs.getInt(_kPixelFixerRegionHeight) ??
+          LucentSettings.defaults.pixelFixerRegionHeight,
+      pixelFixerAutoStopMinutes:
+          _prefs.getInt(_kPixelFixerAutoStopMinutes) ??
+          LucentSettings.defaults.pixelFixerAutoStopMinutes,
     );
   }
 
@@ -66,5 +97,25 @@ class SettingsRepository {
     await _prefs.setString(_kHotkey, settings.hotkey);
     await _prefs.setString(_kCleaningMode, settings.cleaningMode.token);
     await _prefs.setBool(_kGuidedWipe, settings.guidedWipe);
+    await _prefs.setString(_kPixelFixerMode, settings.pixelFixerMode);
+    await _prefs.setInt(_kPixelFixerHz, settings.pixelFixerHz);
+    await _prefs.setBool(
+      _kPixelFixerRegionEnabled,
+      settings.pixelFixerRegionEnabled,
+    );
+    await _prefs.setInt(_kPixelFixerRegionLeft, settings.pixelFixerRegionLeft);
+    await _prefs.setInt(_kPixelFixerRegionTop, settings.pixelFixerRegionTop);
+    await _prefs.setInt(
+      _kPixelFixerRegionWidth,
+      settings.pixelFixerRegionWidth,
+    );
+    await _prefs.setInt(
+      _kPixelFixerRegionHeight,
+      settings.pixelFixerRegionHeight,
+    );
+    await _prefs.setInt(
+      _kPixelFixerAutoStopMinutes,
+      settings.pixelFixerAutoStopMinutes,
+    );
   }
 }

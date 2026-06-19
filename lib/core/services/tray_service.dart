@@ -7,12 +7,14 @@ class TrayCallbacks {
   const TrayCallbacks({
     required this.onStartCleaning,
     required this.onDisplayLab,
+    required this.onPixelFixer,
     required this.onSettings,
     required this.onQuit,
   });
 
   final Future<void> Function() onStartCleaning;
   final Future<void> Function() onDisplayLab;
+  final Future<void> Function() onPixelFixer;
   final Future<void> Function() onSettings;
   final Future<void> Function() onQuit;
 }
@@ -23,6 +25,7 @@ class TrayService with TrayListener {
 
   static const _startKey = 'start_cleaning';
   static const _labKey = 'display_lab';
+  static const _pixelFixerKey = 'pixel_fixer';
   static const _settingsKey = 'settings';
   static const _quitKey = 'quit';
 
@@ -39,6 +42,7 @@ class TrayService with TrayListener {
         items: [
           MenuItem(key: _startKey, label: 'Start Cleaning'),
           MenuItem(key: _labKey, label: 'Display Lab'),
+          MenuItem(key: _pixelFixerKey, label: 'Pixel Fixer'),
           MenuItem.separator(),
           MenuItem(key: _settingsKey, label: 'Settings'),
           MenuItem.separator(),
@@ -60,6 +64,8 @@ class TrayService with TrayListener {
         unawaited(cb.onStartCleaning());
       case _labKey:
         unawaited(cb.onDisplayLab());
+      case _pixelFixerKey:
+        unawaited(cb.onPixelFixer());
       case _settingsKey:
         unawaited(cb.onSettings());
       case _quitKey:

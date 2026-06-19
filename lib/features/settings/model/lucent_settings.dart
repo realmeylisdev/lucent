@@ -16,6 +16,14 @@ class LucentSettings extends Equatable {
     required this.hotkey,
     required this.cleaningMode,
     required this.guidedWipe,
+    required this.pixelFixerMode,
+    required this.pixelFixerHz,
+    required this.pixelFixerRegionEnabled,
+    required this.pixelFixerRegionLeft,
+    required this.pixelFixerRegionTop,
+    required this.pixelFixerRegionWidth,
+    required this.pixelFixerRegionHeight,
+    required this.pixelFixerAutoStopMinutes,
   });
 
   static const defaults = LucentSettings(
@@ -30,6 +38,14 @@ class LucentSettings extends Equatable {
     hotkey: 'ctrl+alt+l',
     cleaningMode: CleaningMode.full,
     guidedWipe: false,
+    pixelFixerMode: 'rgbCycle',
+    pixelFixerHz: 3,
+    pixelFixerRegionEnabled: false,
+    pixelFixerRegionLeft: 0, // 0,0 origin == "center on first use".
+    pixelFixerRegionTop: 0,
+    pixelFixerRegionWidth: 200,
+    pixelFixerRegionHeight: 200,
+    pixelFixerAutoStopMinutes: 0, // 0 == AutoStopPreset.off.
   );
 
   final String unlockKey;
@@ -43,6 +59,25 @@ class LucentSettings extends Equatable {
   final String hotkey;
   final CleaningMode cleaningMode;
   final bool guidedWipe;
+
+  /// Last-used Pixel Fixer color strategy, stored as a PixelFixerMode token.
+  final String pixelFixerMode;
+
+  /// Last-used Pixel Fixer flash rate in Hz (clamped 1-10 on use).
+  final int pixelFixerHz;
+
+  /// Whether the Pixel Fixer confines cycling to a region.
+  final bool pixelFixerRegionEnabled;
+
+  /// Persisted region geometry in logical px (rounded). 0,0 origin is a
+  /// sentinel meaning "center the region on first use".
+  final int pixelFixerRegionLeft;
+  final int pixelFixerRegionTop;
+  final int pixelFixerRegionWidth;
+  final int pixelFixerRegionHeight;
+
+  /// Auto-stop preset in whole minutes (0 == off).
+  final int pixelFixerAutoStopMinutes;
 
   UnlockKey get unlockKeyEnum => UnlockKey.fromToken(unlockKey);
   Duration get unlockHoldDuration => Duration(milliseconds: unlockHoldMs);
@@ -66,6 +101,14 @@ class LucentSettings extends Equatable {
     String? hotkey,
     CleaningMode? cleaningMode,
     bool? guidedWipe,
+    String? pixelFixerMode,
+    int? pixelFixerHz,
+    bool? pixelFixerRegionEnabled,
+    int? pixelFixerRegionLeft,
+    int? pixelFixerRegionTop,
+    int? pixelFixerRegionWidth,
+    int? pixelFixerRegionHeight,
+    int? pixelFixerAutoStopMinutes,
   }) {
     return LucentSettings(
       unlockKey: unlockKey ?? this.unlockKey,
@@ -79,6 +122,18 @@ class LucentSettings extends Equatable {
       hotkey: hotkey ?? this.hotkey,
       cleaningMode: cleaningMode ?? this.cleaningMode,
       guidedWipe: guidedWipe ?? this.guidedWipe,
+      pixelFixerMode: pixelFixerMode ?? this.pixelFixerMode,
+      pixelFixerHz: pixelFixerHz ?? this.pixelFixerHz,
+      pixelFixerRegionEnabled:
+          pixelFixerRegionEnabled ?? this.pixelFixerRegionEnabled,
+      pixelFixerRegionLeft: pixelFixerRegionLeft ?? this.pixelFixerRegionLeft,
+      pixelFixerRegionTop: pixelFixerRegionTop ?? this.pixelFixerRegionTop,
+      pixelFixerRegionWidth:
+          pixelFixerRegionWidth ?? this.pixelFixerRegionWidth,
+      pixelFixerRegionHeight:
+          pixelFixerRegionHeight ?? this.pixelFixerRegionHeight,
+      pixelFixerAutoStopMinutes:
+          pixelFixerAutoStopMinutes ?? this.pixelFixerAutoStopMinutes,
     );
   }
 
@@ -95,5 +150,13 @@ class LucentSettings extends Equatable {
     hotkey,
     cleaningMode,
     guidedWipe,
+    pixelFixerMode,
+    pixelFixerHz,
+    pixelFixerRegionEnabled,
+    pixelFixerRegionLeft,
+    pixelFixerRegionTop,
+    pixelFixerRegionWidth,
+    pixelFixerRegionHeight,
+    pixelFixerAutoStopMinutes,
   ];
 }

@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/features/display_lab/cubit/pixel_fixer_cubit.dart';
+import 'package:lucent/features/display_lab/models/auto_stop_preset.dart';
 import 'package:lucent/features/display_lab/models/pixel_fixer_mode.dart';
+import 'package:lucent/features/display_lab/widgets/draggable_region.dart';
+import 'package:lucent/features/settings/data/settings_repository.dart';
 
 /// Full-screen stuck-pixel exerciser. Rapidly cycles solid colors to coax
 /// stuck sub-pixels back to life. A photosensitivity warning is shown and must
@@ -14,9 +17,13 @@ import 'package:lucent/features/display_lab/models/pixel_fixer_mode.dart';
 class PixelFixerPage extends StatelessWidget {
   const PixelFixerPage({super.key});
 
+  /// Self-provisions a [PixelFixerCubit] from the app-wide
+  /// [SettingsRepository] so the page can launch standalone (tray) or from
+  /// Display Lab, always seeded with the last-used persisted config.
   static Route<void> route() => MaterialPageRoute<void>(
-    builder: (_) => BlocProvider(
-      create: (_) => PixelFixerCubit(),
+    builder: (context) => BlocProvider(
+      create: (_) =>
+          PixelFixerCubit(repository: context.read<SettingsRepository>()),
       child: const PixelFixerPage(),
     ),
     fullscreenDialog: true,
@@ -96,6 +103,24 @@ class _PixelFixerViewState extends State<_PixelFixerView> {
     return KeyEventResult.ignored;
   }
 
+  /// Centers the default region on first layout if it still carries the 0,0
+  /// sentinel and the cubit knows the live screen size.
+  void _maybeCenterRegion(PixelFixerState state, Size size) {
+    if (!state.regionEnabled || !state.regionNeedsCentering) return;
+    if (size.isEmpty) return;
+    final centered = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: state.region.width,
+      height: state.region.height,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // Auto-derived default (not a user gesture): don't persist it.
+        context.read<PixelFixerCubit>().setRegion(centered, persist: false);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -104,33 +129,87 @@ class _PixelFixerViewState extends State<_PixelFixerView> {
       onKeyEvent: _onKey,
       child: BlocBuilder<PixelFixerCubit, PixelFixerState>(
         builder: (context, state) {
+          final cubit = context.read<PixelFixerCubit>();
           final color = state.mode.colorForFrame(state.frame);
+          final showChrome = _controlsVisible || !state.running;
           return Scaffold(
-            backgroundColor: const Color(0xFF202020),
-            body: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _showControls,
-              onLongPress: () => unawaited(Navigator.of(context).maybePop()),
-              child: Stack(
-                children: [
-                  Positioned.fill(child: ColoredBox(color: color)),
-                  if (_controlsVisible || !state.running)
-                    _Controls(
-                      state: state,
-                      onToggle: () {
-                        if (state.running) {
-                          context.read<PixelFixerCubit>().stop();
-                        } else {
-                          unawaited(_confirmAndStart());
-                        }
-                        _showControls();
-                      },
-                    ),
-                ],
-              ),
+            backgroundColor: const Color(0xFF000000),
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final size = constraints.biggest;
+                _maybeCenterRegion(state, size);
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _showControls,
+                  onLongPress: () =>
+                      unawaited(Navigator.of(context).maybePop()),
+                  child: Stack(
+                    children: [
+                      if (state.regionEnabled)
+                        DraggableRegion(
+                          region: state.region,
+                          color: color,
+                          bounds: size,
+                          editable: showChrome,
+                          onChanged: (rect) =>
+                              cubit.setRegion(rect, persist: false),
+                          onChangeEnd: () => cubit.setRegion(state.region),
+                        )
+                      else
+                        Positioned.fill(child: ColoredBox(color: color)),
+                      if (state.running && state.autoStop != AutoStopPreset.off)
+                        _AutoStopPill(label: state.remainingLabel),
+                      if (showChrome)
+                        _Controls(
+                          state: state,
+                          onToggle: () {
+                            if (state.running) {
+                              cubit.stop();
+                            } else {
+                              unawaited(_confirmAndStart());
+                            }
+                            _showControls();
+                          },
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Static, once-per-second countdown pill near the top-center. Stays visible
+/// while the bottom controls auto-hide because it is safety/expectation info.
+class _AutoStopPill extends StatelessWidget {
+  const _AutoStopPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'Auto-stop in $label',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -166,6 +245,22 @@ class _Controls extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 children: [
+                  ChoiceChip(
+                    label: const Text('Full screen'),
+                    selected: !state.regionEnabled,
+                    onSelected: (_) => cubit.setRegionEnabled(false),
+                  ),
+                  ChoiceChip(
+                    label: const Text('Region'),
+                    selected: state.regionEnabled,
+                    onSelected: (_) => cubit.setRegionEnabled(true),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: [
                   for (final mode in PixelFixerMode.values)
                     ChoiceChip(
                       label: Text(mode.label),
@@ -191,7 +286,9 @@ class _Controls extends StatelessWidget {
                       max: PixelFixerState.maxHz.toDouble(),
                       divisions: PixelFixerState.maxHz - PixelFixerState.minHz,
                       label: '${state.frequencyHz} Hz',
-                      onChanged: (v) => cubit.setFrequency(v.round()),
+                      onChanged: (v) =>
+                          cubit.setFrequency(v.round(), persist: false),
+                      onChangeEnd: (v) => cubit.setFrequency(v.round()),
                     ),
                   ),
                   Text(
@@ -203,6 +300,28 @@ class _Controls extends StatelessWidget {
               const Text(
                 'higher = more aggressive',
                 style: TextStyle(color: Colors.white38, fontSize: 11),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Auto-stop:',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  const SizedBox(width: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final preset in AutoStopPreset.values)
+                        ChoiceChip(
+                          label: Text(preset.label),
+                          selected: state.autoStop == preset,
+                          onSelected: (_) => cubit.setAutoStop(preset),
+                        ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               FilledButton.icon(

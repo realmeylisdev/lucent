@@ -28,37 +28,37 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> setUnlockKey(String token) =>
-      _persist(state.settings.copyWith(unlockKey: token));
+      _persist(_repository.value.copyWith(unlockKey: token));
 
   Future<void> setUnlockHoldMs(int ms) =>
-      _persist(state.settings.copyWith(unlockHoldMs: ms));
+      _persist(_repository.value.copyWith(unlockHoldMs: ms));
 
   Future<void> setPointerLock(bool value) =>
-      _persist(state.settings.copyWith(pointerLock: value));
+      _persist(_repository.value.copyWith(pointerLock: value));
 
   Future<void> setBrightnessBoost(bool value) =>
-      _persist(state.settings.copyWith(brightnessBoost: value));
+      _persist(_repository.value.copyWith(brightnessBoost: value));
 
   Future<void> setBackgroundColor(int argb) =>
-      _persist(state.settings.copyWith(backgroundColor: argb));
+      _persist(_repository.value.copyWith(backgroundColor: argb));
 
   Future<void> setCountdownSeconds(int seconds) =>
-      _persist(state.settings.copyWith(countdownSeconds: seconds));
+      _persist(_repository.value.copyWith(countdownSeconds: seconds));
 
   Future<void> setStartInCleaning(bool value) =>
-      _persist(state.settings.copyWith(startInCleaning: value));
+      _persist(_repository.value.copyWith(startInCleaning: value));
 
   Future<void> setHotkey(String value) =>
-      _persist(state.settings.copyWith(hotkey: value));
+      _persist(_repository.value.copyWith(hotkey: value));
 
   Future<void> setCleaningMode(CleaningMode mode) =>
-      _persist(state.settings.copyWith(cleaningMode: mode));
+      _persist(_repository.value.copyWith(cleaningMode: mode));
 
   Future<void> setGuidedWipe(bool value) =>
-      _persist(state.settings.copyWith(guidedWipe: value));
+      _persist(_repository.value.copyWith(guidedWipe: value));
 
   Future<void> setAutoStart(bool value) async {
     await _autoStart.setEnabled(value);
-    await _persist(state.settings.copyWith(autoStart: value));
+    await _persist(_repository.value.copyWith(autoStart: value));
   }
 }

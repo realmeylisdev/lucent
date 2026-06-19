@@ -10,6 +10,7 @@ import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/view/cleaning_page.dart';
 import 'package:lucent/features/display_lab/view/display_lab_page.dart';
+import 'package:lucent/features/display_lab/view/pixel_fixer_page.dart';
 import 'package:lucent/features/home/view/home_page.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
 import 'package:lucent/features/settings/view/settings_page.dart';
@@ -49,6 +50,7 @@ class _AppShellState extends State<AppShell> {
       TrayCallbacks(
         onStartCleaning: _startCleaning,
         onDisplayLab: _openDisplayLab,
+        onPixelFixer: _openPixelFixer,
         onSettings: _openSettings,
         onQuit: _quit,
       ),
@@ -92,6 +94,13 @@ class _AppShellState extends State<AppShell> {
     await windowManager.show();
     if (!mounted) return;
     await Navigator.of(context).push(DisplayLabPage.route());
+  }
+
+  Future<void> _openPixelFixer() async {
+    if (!mounted) return;
+    await windowManager.show();
+    if (!mounted) return;
+    await Navigator.of(context).push(PixelFixerPage.route());
   }
 
   Future<void> _openSettings() async {

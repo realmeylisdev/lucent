@@ -39,6 +39,46 @@ void main() {
       expect(loaded.cleaningMode, CleaningMode.full);
     });
 
+    test('round-trips the pixel-fixer config through prefs', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repo = SettingsRepository(prefs);
+
+      await repo.save(
+        LucentSettings.defaults.copyWith(
+          pixelFixerMode: 'whiteFlash',
+          pixelFixerHz: 8,
+          pixelFixerRegionEnabled: true,
+          pixelFixerRegionLeft: 40,
+          pixelFixerRegionTop: 50,
+          pixelFixerRegionWidth: 160,
+          pixelFixerRegionHeight: 180,
+          pixelFixerAutoStopMinutes: 60,
+        ),
+      );
+
+      final reloaded = await SettingsRepository(prefs).load();
+      expect(reloaded.pixelFixerMode, 'whiteFlash');
+      expect(reloaded.pixelFixerHz, 8);
+      expect(reloaded.pixelFixerRegionEnabled, isTrue);
+      expect(reloaded.pixelFixerRegionLeft, 40);
+      expect(reloaded.pixelFixerRegionTop, 50);
+      expect(reloaded.pixelFixerRegionWidth, 160);
+      expect(reloaded.pixelFixerRegionHeight, 180);
+      expect(reloaded.pixelFixerAutoStopMinutes, 60);
+    });
+
+    test('pixel-fixer config falls back to defaults', () async {
+      SharedPreferences.setMockInitialValues({});
+      final repo = SettingsRepository(await SharedPreferences.getInstance());
+      final loaded = await repo.load();
+      expect(loaded.pixelFixerMode, 'rgbCycle');
+      expect(loaded.pixelFixerHz, 3);
+      expect(loaded.pixelFixerRegionEnabled, isFalse);
+      expect(loaded.pixelFixerRegionWidth, 200);
+      expect(loaded.pixelFixerAutoStopMinutes, 0);
+    });
+
     test('preserves the other settings across a round-trip', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
