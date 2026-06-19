@@ -7,11 +7,13 @@
 
 #include "flutter/generated_plugin_registrant.h"
 #include "input_lock_plugin.h"
+#include "monitor_cover_plugin.h"
 
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
-  InputLockPlugin* input_lock_plugin;  // owned
+  InputLockPlugin* input_lock_plugin;        // owned
+  MonitorCoverPlugin* monitor_cover_plugin;  // owned
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -85,6 +87,12 @@ static void my_application_activate(GApplication* application) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
   self->input_lock_plugin = input_lock_plugin_new(messenger, window);
 
+  // Register the Lucent monitor-cover plugin (secondary-display blackout). It
+  // shares the same binary messenger and uses the top-level window only to
+  // identify which monitor the app lives on when no primary monitor is
+  // reported (e.g. on Wayland).
+  self->monitor_cover_plugin = monitor_cover_plugin_new(messenger, window);
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
@@ -132,6 +140,7 @@ static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   g_clear_object(&self->input_lock_plugin);
+  g_clear_object(&self->monitor_cover_plugin);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 

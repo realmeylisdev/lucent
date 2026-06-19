@@ -30,6 +30,10 @@ bool FlutterWindow::OnCreate() {
   input_lock_plugin_ = std::make_unique<InputLockPlugin>(
       flutter_controller_->engine()->messenger(), GetHandle());
 
+  // Lucent: install the native monitor-cover plugin (secondary-display blackout).
+  monitor_cover_plugin_ = std::make_unique<MonitorCoverPlugin>(
+      flutter_controller_->engine()->messenger());
+
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -48,6 +52,11 @@ void FlutterWindow::OnDestroy() {
   if (input_lock_plugin_) {
     input_lock_plugin_->Shutdown();
     input_lock_plugin_ = nullptr;
+  }
+
+  if (monitor_cover_plugin_) {
+    monitor_cover_plugin_->Shutdown();
+    monitor_cover_plugin_ = nullptr;
   }
 
   if (flutter_controller_) {

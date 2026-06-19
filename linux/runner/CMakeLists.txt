@@ -46,6 +46,7 @@ add_executable(${BINARY_NAME}
   "main.cc"
   "my_application.cc"
   "input_lock_plugin.cc"
+  "monitor_cover_plugin.cc"
   "${INPUT_LOCK_PROTO_SOURCE}"
   "${INPUT_LOCK_PROTO_HEADER}"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"

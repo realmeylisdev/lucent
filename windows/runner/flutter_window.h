@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "input_lock_plugin.h"
+#include "monitor_cover_plugin.h"
 #include "win32_window.h"
 
 // A window that does nothing but host a Flutter view.
@@ -32,6 +33,9 @@ class FlutterWindow : public Win32Window {
 
   // Lucent's native input-lock plugin (WH_KEYBOARD_LL / WH_MOUSE_LL).
   std::unique_ptr<InputLockPlugin> input_lock_plugin_;
+
+  // Lucent's native monitor-cover plugin (blacks out non-primary displays).
+  std::unique_ptr<MonitorCoverPlugin> monitor_cover_plugin_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_
