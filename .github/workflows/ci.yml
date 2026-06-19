@@ -43,3 +43,41 @@ jobs:
       # without secrets.
       - name: Build macOS (debug)
         run: flutter build macos --debug
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Flutter's Linux toolchain + the native input-lock deps (X11 grab,
+      # xkbcommon, Wayland client + protocols + wayland-scanner).
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libx11-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libwayland-bin
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.0
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Linux (debug)
+        run: flutter build linux --debug
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.0
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Windows (debug)
+        run: flutter build windows --debug

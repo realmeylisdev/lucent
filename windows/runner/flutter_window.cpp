@@ -25,6 +25,11 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+
+  // Lucent: install the native input-lock plugin once the engine exists.
+  input_lock_plugin_ = std::make_unique<InputLockPlugin>(
+      flutter_controller_->engine()->messenger(), GetHandle());
+
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -40,6 +45,11 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  if (input_lock_plugin_) {
+    input_lock_plugin_->Shutdown();
+    input_lock_plugin_ = nullptr;
+  }
+
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }
@@ -59,6 +69,13 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     if (result) {
       return *result;
     }
+  }
+
+  // Lucent: the input-lock heartbeat thread posts this message to drive
+  // unlock progress on the platform thread.
+  if (input_lock_plugin_ && message == InputLockPlugin::kWmInputLockTick) {
+    input_lock_plugin_->OnHeartbeatTick();
+    return 0;
   }
 
   switch (message) {
