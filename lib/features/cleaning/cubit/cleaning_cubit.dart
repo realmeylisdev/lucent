@@ -22,7 +22,7 @@ class CleaningCubit extends Cubit<CleaningState> {
     required this._nativeLock,
     required this._monitorCover,
     required this._brightness,
-  })  : super(const CleaningState.idle());
+  }) : super(const CleaningState.idle());
 
   final NativeLockController _nativeLock;
   final MultiMonitorCover _monitorCover;
@@ -39,8 +39,9 @@ class CleaningCubit extends Cubit<CleaningState> {
       CleaningState(
         status: CleaningStatus.cleaning,
         backgroundColor: settings.backgroundColor,
-        remainingSeconds:
-            settings.hasCountdown ? settings.countdownSeconds : null,
+        remainingSeconds: settings.hasCountdown
+            ? settings.countdownSeconds
+            : null,
       ),
     );
 
@@ -55,8 +56,9 @@ class CleaningCubit extends Cubit<CleaningState> {
     await windowManager.setFullScreen(true);
     await windowManager.setAlwaysOnTop(true);
 
-    final rgb =
-        (settings.backgroundColor & 0xFFFFFF).toRadixString(16).padLeft(6, '0');
+    final rgb = (settings.backgroundColor & 0xFFFFFF)
+        .toRadixString(16)
+        .padLeft(6, '0');
     await _monitorCover.coverSecondaryDisplays(backgroundColorHex: '#$rgb');
 
     await _nativeLock.startLock(

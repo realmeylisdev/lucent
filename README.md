@@ -1,5 +1,7 @@
 # Lucent
 
+[![CI](https://github.com/realmeylisdev/lucent/actions/workflows/ci.yml/badge.svg)](https://github.com/realmeylisdev/lucent/actions/workflows/ci.yml)
+
 A cross-platform (macOS / Windows / Linux) Flutter **desktop** screen-cleaning
 utility with a **real native OS-level input lock** — a superior alternative to
 the Mac App Store "Pristine Screen" and similar apps that rely only on Flutter's
@@ -21,21 +23,21 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Brightness boost (`screen_brightness`) | ✅ | ✅ | ⚠️ no-op (unsupported) |
 | Accessibility permission onboarding | ✅ | n/a | n/a |
 | Settings (persisted) | ✅ | ✅ | ✅ |
-| Multi-monitor **visual** blackout | ⏳ deferred² | ⏳² | ⏳² |
-| Menu-bar / tray + global hotkey | 🔧 built, not yet activated³ | 🔧³ | 🔧³ |
+| Multi-monitor **visual** blackout | ✅ native (NSWindow/screen) | ⏳ deferred² | ⏳² |
+| Menu-bar / tray + global hotkey | ✅ | ✅³ | ✅³ |
 
 ¹ Windows/Linux native code matches the shared contract but has only been
 verified to build on macOS so far — build/run on those platforms to validate.
-² The native lock already covers **all** displays (keyboard/trackpad are locked
-everywhere); only the cosmetic blackout of secondary screens is pending — see
-`lib/core/services/multi_monitor_cover.dart`. `desktop_multi_window` 0.3.0 can't
-position a window per-display, so this needs the patched `window_manager` fork or
-Flutter's experimental multi-window API.
-³ `TrayService` / `GlobalHotkeyService` are implemented and dependency-injected;
-the app-root activation call (`tray.init(...)` / `hotkeys.register(...)`) is the
-remaining wiring.
+² macOS blacks out every non-main display natively (`MonitorCoverPlugin` → one
+borderless black `NSWindow` per `NSScreen`). Windows/Linux are deferred and need
+their own native cover windows. The input lock already covers **all** displays
+regardless — this is purely visual.
+³ Activated at the app root (`AppShell`): a menu-bar / tray item (Start Cleaning
+/ Display Test / Settings / Quit) and a global start-cleaning hotkey. Verified on
+macOS; Windows/Linux pending an on-platform check.
 
-`flutter analyze` is clean under `very_good_analysis`; unit tests pass.
+macOS builds & runs; `flutter analyze` is clean under `very_good_analysis`; unit
+tests pass; CI runs analyze + test + a macOS build on every push.
 
 ## Architecture (VGV, feature-first)
 

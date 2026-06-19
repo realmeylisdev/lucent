@@ -12,7 +12,7 @@ part 'accessibility_state.dart';
 /// reports [AccessibilityStatus.granted] immediately.
 class AccessibilityCubit extends Cubit<AccessibilityState> {
   AccessibilityCubit({required this._nativeLock})
-      : super(const AccessibilityState.unknown());
+    : super(const AccessibilityState.unknown());
 
   final NativeLockController _nativeLock;
 

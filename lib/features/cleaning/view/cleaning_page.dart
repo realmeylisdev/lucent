@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucent/core/services/multi_monitor_cover.dart' show MultiMonitorCover;
+import 'package:lucent/core/services/multi_monitor_cover.dart'
+    show MultiMonitorCover;
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/widgets/unlock_ring.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
@@ -14,9 +15,9 @@ class CleaningPage extends StatelessWidget {
   const CleaningPage({super.key});
 
   static Route<void> route() => MaterialPageRoute<void>(
-        builder: (_) => const CleaningPage(),
-        fullscreenDialog: true,
-      );
+    builder: (_) => const CleaningPage(),
+    fullscreenDialog: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +31,11 @@ class CleaningPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final unlockKey =
-            context.read<SettingsCubit>().state.settings.unlockKeyEnum;
+        final unlockKey = context
+            .read<SettingsCubit>()
+            .state
+            .settings
+            .unlockKeyEnum;
         return Scaffold(
           backgroundColor: Color(state.backgroundColor),
           body: SafeArea(

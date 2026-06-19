@@ -12,10 +12,10 @@ class CleaningState extends Equatable {
   });
 
   const CleaningState.idle()
-      : status = CleaningStatus.idle,
-        backgroundColor = 0xFF000000,
-        unlockProgress = 0,
-        remainingSeconds = null;
+    : status = CleaningStatus.idle,
+      backgroundColor = 0xFF000000,
+      unlockProgress = 0,
+      remainingSeconds = null;
 
   final CleaningStatus status;
   final int backgroundColor;
@@ -43,6 +43,10 @@ class CleaningState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, backgroundColor, unlockProgress, remainingSeconds];
+  List<Object?> get props => [
+    status,
+    backgroundColor,
+    unlockProgress,
+    remainingSeconds,
+  ];
 }

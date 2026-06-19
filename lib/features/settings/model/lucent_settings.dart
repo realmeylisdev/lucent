@@ -67,14 +67,14 @@ class LucentSettings extends Equatable {
 
   @override
   List<Object?> get props => [
-        unlockKey,
-        unlockHoldMs,
-        pointerLock,
-        brightnessBoost,
-        backgroundColor,
-        autoStart,
-        startInCleaning,
-        countdownSeconds,
-        hotkey,
-      ];
+    unlockKey,
+    unlockHoldMs,
+    pointerLock,
+    brightnessBoost,
+    backgroundColor,
+    autoStart,
+    startInCleaning,
+    countdownSeconds,
+    hotkey,
+  ];
 }

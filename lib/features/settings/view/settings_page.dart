@@ -38,10 +38,12 @@ class SettingsPage extends StatelessWidget {
                   onChanged: (v) =>
                       v == null ? null : cubit.setUnlockKey(v.token),
                   items: UnlockKey.values
-                      .map((k) => DropdownMenuItem(
-                            value: k,
-                            child: Text(k.label),
-                          ))
+                      .map(
+                        (k) => DropdownMenuItem(
+                          value: k,
+                          child: Text(k.label),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -78,11 +80,13 @@ class SettingsPage extends StatelessWidget {
                 subtitle: Wrap(
                   spacing: 8,
                   children: _colors
-                      .map((c) => _ColorDot(
-                            argb: c,
-                            selected: s.backgroundColor == c,
-                            onTap: () => cubit.setBackgroundColor(c),
-                          ))
+                      .map(
+                        (c) => _ColorDot(
+                          argb: c,
+                          selected: s.backgroundColor == c,
+                          onTap: () => cubit.setBackgroundColor(c),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -134,16 +138,16 @@ class _SectionLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          text.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            letterSpacing: 1.2,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Text(
+      text.toUpperCase(),
+      style: const TextStyle(
+        color: Colors.white38,
+        fontSize: 12,
+        letterSpacing: 1.2,
+      ),
+    ),
+  );
 }
 
 class _ColorDot extends StatelessWidget {

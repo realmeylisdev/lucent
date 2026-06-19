@@ -5,8 +5,8 @@ class SettingsState extends Equatable {
   const SettingsState({required this.settings, this.saving = false});
 
   const SettingsState.initial()
-      : settings = LucentSettings.defaults,
-        saving = false;
+    : settings = LucentSettings.defaults,
+      saving = false;
 
   final LucentSettings settings;
   final bool saving;

@@ -44,8 +44,8 @@ class NativeLockController {
   NativeLockController({
     MethodChannel? method,
     EventChannel? events,
-  })  : _method = method ?? const MethodChannel(LucentChannels.method),
-        _events = events ?? const EventChannel(LucentChannels.events);
+  }) : _method = method ?? const MethodChannel(LucentChannels.method),
+       _events = events ?? const EventChannel(LucentChannels.events);
 
   final MethodChannel _method;
   final EventChannel _events;
@@ -107,15 +107,16 @@ class NativeLockController {
 
   /// Release the native input lock (app-initiated, e.g. timer end / quit).
   Future<void> stopLock() => _method.invokeMethod<bool>(
-        LucentMethods.unlock,
-        {'reason': 'programmatic'},
-      );
+    LucentMethods.unlock,
+    {'reason': 'programmatic'},
+  );
 
   /// macOS: whether Accessibility / Input-Monitoring is granted. Other
   /// platforms report `notRequired` and therefore resolve to `true`.
   Future<bool> isAccessibilityTrusted() async {
-    final status =
-        await _method.invokeMethod<String>(LucentMethods.checkPermission);
+    final status = await _method.invokeMethod<String>(
+      LucentMethods.checkPermission,
+    );
     return status == 'granted' || status == 'notRequired';
   }
 

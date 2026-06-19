@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucent/app/desktop_chrome.dart';
 import 'package:lucent/app/theme.dart';
 import 'package:lucent/core/platform/native_lock_controller.dart';
 import 'package:lucent/core/services/auto_start_service.dart';
@@ -11,7 +12,6 @@ import 'package:lucent/core/services/multi_monitor_cover.dart';
 import 'package:lucent/core/services/tray_service.dart';
 import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
-import 'package:lucent/features/home/view/home_page.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
 import 'package:lucent/features/settings/data/settings_repository.dart';
 
@@ -76,7 +76,7 @@ class LucentApp extends StatelessWidget {
           title: 'Lucent',
           debugShowCheckedModeBanner: false,
           theme: LucentTheme.dark,
-          home: const HomePage(),
+          home: const AppShell(),
         ),
       ),
     );

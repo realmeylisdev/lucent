@@ -1,30 +1,43 @@
+import 'package:flutter/services.dart';
+
 /// Blacks out every NON-primary display during a cleaning session.
 ///
-/// v1 status — DEFERRED (no-op). The native input lock already applies globally
-/// across every display, so the keyboard and trackpad are locked everywhere
-/// regardless of how many monitors are attached. Only the *visual* blackout of
-/// secondary screens is outstanding.
+/// The native input lock already applies globally across every display, so the
+/// keyboard and trackpad are locked everywhere regardless; this adds the
+/// *visual* blackout of secondary screens.
 ///
-/// It is deferred because the desktop multi-window plugins available for
-/// Flutter 3.44 (`desktop_multi_window` 0.3.0) cannot position a window on a
-/// specific display — its `WindowController` exposes only `show()`/`hide()`,
-/// no `setFrame`. A correct implementation needs either the patched
-/// `window_manager` fork (as the original used) or Flutter's experimental
-/// multi-window API.
-///
-/// This class keeps the cleaning-session integration point stable: implementing
-/// the cover later is a drop-in change behind these two methods, with no caller
-/// changes required.
+/// Implemented natively on macOS (`MonitorCoverPlugin` spawns a borderless
+/// black `NSWindow` per non-main `NSScreen`). On platforms without the
+/// plugin (Windows/Linux today) the calls throw [MissingPluginException] and
+/// are treated as a no-op — best-effort, never blocking the cleaning session.
 class MultiMonitorCover {
-  /// Spawn a black cover on each non-primary display. No-op while deferred.
+  static const _channel = MethodChannel('video.divine.lucent/monitor_cover');
+
+  /// Spawn a cover on each non-primary display, painted [backgroundColorHex]
+  /// (`#rrggbb`).
   Future<void> coverSecondaryDisplays({
     required String backgroundColorHex,
   }) async {
-    // Intentionally empty — see class doc. Never blocks the cleaning session.
+    try {
+      await _channel.invokeMethod<bool>(
+        'cover',
+        {'colorHex': backgroundColorHex},
+      );
+    } on MissingPluginException {
+      // Not implemented on this platform yet — no-op.
+    } on PlatformException {
+      // Best-effort; never block the cleaning session.
+    }
   }
 
-  /// Release every spawned cover. No-op while deferred.
+  /// Close every cover window so all displays release together on unlock.
   Future<void> releaseAll() async {
-    // Intentionally empty — nothing is spawned yet.
+    try {
+      await _channel.invokeMethod<bool>('release');
+    } on MissingPluginException {
+      // Not implemented on this platform yet — no-op.
+    } on PlatformException {
+      // Best-effort.
+    }
   }
 }

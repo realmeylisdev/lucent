@@ -31,8 +31,8 @@ class TrayService with TrayListener {
     _callbacks = callbacks;
     trayManager.addListener(this);
     await trayManager.setIcon(
-      // Provide a platform-appropriate template icon asset in your bundle.
       'assets/tray/lucent_tray.png',
+      isTemplate: true, // macOS menu-bar: tint the monochrome glyph to match.
     );
     await trayManager.setContextMenu(
       Menu(

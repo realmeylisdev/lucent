@@ -23,21 +23,25 @@ class SettingsRepository {
 
   Future<LucentSettings> load() async {
     return _cache = LucentSettings(
-      unlockKey: _prefs.getString(_kUnlockKey) ??
-          LucentSettings.defaults.unlockKey,
+      unlockKey:
+          _prefs.getString(_kUnlockKey) ?? LucentSettings.defaults.unlockKey,
       unlockHoldMs:
           _prefs.getInt(_kUnlockHoldMs) ?? LucentSettings.defaults.unlockHoldMs,
       pointerLock:
           _prefs.getBool(_kPointerLock) ?? LucentSettings.defaults.pointerLock,
-      brightnessBoost: _prefs.getBool(_kBrightnessBoost) ??
+      brightnessBoost:
+          _prefs.getBool(_kBrightnessBoost) ??
           LucentSettings.defaults.brightnessBoost,
-      backgroundColor: _prefs.getInt(_kBackgroundColor) ??
+      backgroundColor:
+          _prefs.getInt(_kBackgroundColor) ??
           LucentSettings.defaults.backgroundColor,
       autoStart:
           _prefs.getBool(_kAutoStart) ?? LucentSettings.defaults.autoStart,
-      startInCleaning: _prefs.getBool(_kStartInCleaning) ??
+      startInCleaning:
+          _prefs.getBool(_kStartInCleaning) ??
           LucentSettings.defaults.startInCleaning,
-      countdownSeconds: _prefs.getInt(_kCountdownSeconds) ??
+      countdownSeconds:
+          _prefs.getInt(_kCountdownSeconds) ??
           LucentSettings.defaults.countdownSeconds,
       hotkey: _prefs.getString(_kHotkey) ?? LucentSettings.defaults.hotkey,
     );

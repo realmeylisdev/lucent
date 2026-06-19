@@ -15,7 +15,7 @@ enum UnlockKey {
   final String label;
 
   static UnlockKey fromToken(String? token) => values.firstWhere(
-        (k) => k.token == token,
-        orElse: () => UnlockKey.escape,
-      );
+    (k) => k.token == token,
+    orElse: () => UnlockKey.escape,
+  );
 }

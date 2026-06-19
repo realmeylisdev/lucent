@@ -14,12 +14,12 @@ class DisplayTestPage extends StatelessWidget {
   const DisplayTestPage({super.key});
 
   static Route<void> route() => MaterialPageRoute<void>(
-        builder: (_) => BlocProvider(
-          create: (_) => TestPatternCubit(),
-          child: const DisplayTestPage(),
-        ),
-        fullscreenDialog: true,
-      );
+    builder: (_) => BlocProvider(
+      create: (_) => TestPatternCubit(),
+      child: const DisplayTestPage(),
+    ),
+    fullscreenDialog: true,
+  );
 
   @override
   Widget build(BuildContext context) {
