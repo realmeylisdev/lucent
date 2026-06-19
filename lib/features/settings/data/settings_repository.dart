@@ -1,3 +1,4 @@
+import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
 import 'package:lucent/features/settings/model/lucent_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,6 +17,8 @@ class SettingsRepository {
   static const _kStartInCleaning = 'start_in_cleaning';
   static const _kCountdownSeconds = 'countdown_seconds';
   static const _kHotkey = 'hotkey';
+  static const _kCleaningMode = 'cleaning_mode';
+  static const _kGuidedWipe = 'guided_wipe';
 
   LucentSettings _cache = LucentSettings.defaults;
 
@@ -44,6 +47,9 @@ class SettingsRepository {
           _prefs.getInt(_kCountdownSeconds) ??
           LucentSettings.defaults.countdownSeconds,
       hotkey: _prefs.getString(_kHotkey) ?? LucentSettings.defaults.hotkey,
+      cleaningMode: CleaningMode.fromToken(_prefs.getString(_kCleaningMode)),
+      guidedWipe:
+          _prefs.getBool(_kGuidedWipe) ?? LucentSettings.defaults.guidedWipe,
     );
   }
 
@@ -58,5 +64,7 @@ class SettingsRepository {
     await _prefs.setBool(_kStartInCleaning, settings.startInCleaning);
     await _prefs.setInt(_kCountdownSeconds, settings.countdownSeconds);
     await _prefs.setString(_kHotkey, settings.hotkey);
+    await _prefs.setString(_kCleaningMode, settings.cleaningMode.token);
+    await _prefs.setBool(_kGuidedWipe, settings.guidedWipe);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/core/services/auto_start_service.dart';
+import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
 import 'package:lucent/features/settings/data/settings_repository.dart';
 import 'package:lucent/features/settings/model/lucent_settings.dart';
 
@@ -49,6 +50,12 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> setHotkey(String value) =>
       _persist(state.settings.copyWith(hotkey: value));
+
+  Future<void> setCleaningMode(CleaningMode mode) =>
+      _persist(state.settings.copyWith(cleaningMode: mode));
+
+  Future<void> setGuidedWipe(bool value) =>
+      _persist(state.settings.copyWith(guidedWipe: value));
 
   Future<void> setAutoStart(bool value) async {
     await _autoStart.setEnabled(value);

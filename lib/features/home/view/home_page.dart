@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/view/cleaning_page.dart';
+import 'package:lucent/features/cleaning/widgets/cleaning_mode_selector.dart';
 import 'package:lucent/features/display_lab/view/display_lab_page.dart';
 import 'package:lucent/features/home/widgets/accessibility_card.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
@@ -79,6 +80,15 @@ class HomePage extends StatelessWidget {
                       const AccessibilityCard(),
                       const SizedBox(height: 16),
                     ],
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) => CleaningModeSelector(
+                        value: state.settings.cleaningMode,
+                        onChanged: context
+                            .read<SettingsCubit>()
+                            .setCleaningMode,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     FilledButton.icon(
                       onPressed: canClean
                           ? () => _startCleaning(context)

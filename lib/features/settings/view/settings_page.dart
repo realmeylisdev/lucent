@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/core/models/unlock_key.dart';
+import 'package:lucent/features/cleaning/widgets/cleaning_mode_selector.dart';
 import 'package:lucent/features/settings/cubit/settings_cubit.dart';
 
 /// Settings screen bound to [SettingsCubit]; every change persists immediately.
@@ -91,6 +92,27 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               const Divider(),
+              const _SectionLabel('Cleaning mode'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: CleaningModeSelector(
+                  value: s.cleaningMode,
+                  onChanged: cubit.setCleaningMode,
+                ),
+              ),
+              SwitchListTile(
+                title: const Text('Guided wipe overlay'),
+                subtitle: Text(
+                  s.cleaningMode.supportsGuidedWipe
+                      ? 'Faint grid tracks where you have wiped'
+                      : 'Available in Screen / Full modes',
+                ),
+                value: s.guidedWipe && s.cleaningMode.supportsGuidedWipe,
+                onChanged: s.cleaningMode.supportsGuidedWipe
+                    ? cubit.setGuidedWipe
+                    : null,
+              ),
+              const Divider(),
               const _SectionLabel('Timer'),
               ListTile(
                 title: const Text('Auto-exit countdown'),
@@ -98,12 +120,22 @@ class SettingsPage extends StatelessWidget {
                   s.hasCountdown ? '${s.countdownSeconds}s' : 'Off',
                 ),
               ),
-              Slider(
-                value: s.countdownSeconds.toDouble(),
-                max: 120,
-                divisions: 12,
-                label: s.hasCountdown ? '${s.countdownSeconds}s' : 'Off',
-                onChanged: (v) => cubit.setCountdownSeconds(v.round()),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: 0, label: Text('Off')),
+                    ButtonSegment(value: 15, label: Text('15s')),
+                    ButtonSegment(value: 30, label: Text('30s')),
+                    ButtonSegment(value: 60, label: Text('60s')),
+                  ],
+                  emptySelectionAllowed: true,
+                  selected: const {0, 15, 30, 60}.contains(s.countdownSeconds)
+                      ? {s.countdownSeconds}
+                      : const <int>{},
+                  showSelectedIcon: false,
+                  onSelectionChanged: (v) => cubit.setCountdownSeconds(v.first),
+                ),
               ),
               const Divider(),
               const _SectionLabel('Launch'),

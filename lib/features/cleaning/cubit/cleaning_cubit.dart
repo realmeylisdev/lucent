@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucent/core/platform/native_lock_controller.dart';
 import 'package:lucent/core/services/brightness_service.dart';
 import 'package:lucent/core/services/multi_monitor_cover.dart';
+import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
 import 'package:lucent/features/settings/model/lucent_settings.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -35,6 +36,7 @@ class CleaningCubit extends Cubit<CleaningState> {
   Future<void> start(LucentSettings settings) async {
     if (state.status == CleaningStatus.cleaning) return;
 
+    final guided = settings.guidedWipeActive;
     emit(
       CleaningState(
         status: CleaningStatus.cleaning,
@@ -42,6 +44,11 @@ class CleaningCubit extends Cubit<CleaningState> {
         remainingSeconds: settings.hasCountdown
             ? settings.countdownSeconds
             : null,
+        mode: settings.cleaningMode,
+        totalSeconds: settings.hasCountdown ? settings.countdownSeconds : null,
+        guidedWipe: guided,
+        gridColumns: guided ? 12 : 0,
+        gridRows: guided ? 8 : 0,
       ),
     );
 
@@ -65,11 +72,20 @@ class CleaningCubit extends Cubit<CleaningState> {
       unlockKey: settings.unlockKeyEnum,
       unlockHoldDuration: settings.unlockHoldDuration,
       lockPointer: settings.pointerLock,
+      allowMouseMove: settings.allowMouseMove,
     );
 
     if (settings.hasCountdown) {
       _startCountdown();
     }
+  }
+
+  /// Mark a coverage cell as wiped. No-op if guided-wipe isn't active or the
+  /// cell is already covered (keeps emits cheap). Coverage is purely cosmetic;
+  /// the session never ends because of it.
+  void markCellCovered(int index) {
+    if (!state.guidedWipe || state.coveredCells.contains(index)) return;
+    emit(state.copyWith(coveredCells: {...state.coveredCells, index}));
   }
 
   void _startCountdown() {

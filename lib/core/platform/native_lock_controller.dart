@@ -87,10 +87,15 @@ class NativeLockController {
   /// Sends the unlock gesture config first (so the hook knows which swallowed
   /// key ends the session), then installs the tap. [lockPointer] toggles
   /// trackpad/mouse swallowing.
+  ///
+  /// When [lockPointer] && [allowMouseMove], clicks/scroll stay swallowed but
+  /// bare cursor MOVEMENT reaches Flutter (macOS honors this; Windows/Linux may
+  /// ignore it and keep the cursor frozen — degrade gracefully, no error).
   Future<bool> startLock({
     required UnlockKey unlockKey,
     required Duration unlockHoldDuration,
     required bool lockPointer,
+    required bool allowMouseMove,
   }) async {
     await _method.invokeMethod<bool>(LucentMethods.configureUnlockGesture, {
       'gesture': unlockKey == UnlockKey.space ? 'holdSpace' : 'holdEsc',
@@ -99,7 +104,7 @@ class NativeLockController {
     });
     final engaged = await _method.invokeMethod<bool>(LucentMethods.lock, {
       'swallowPointer': lockPointer,
-      'allowMouseMove': false,
+      'allowMouseMove': allowMouseMove,
       'displayIds': <String>[],
     });
     return engaged ?? false;

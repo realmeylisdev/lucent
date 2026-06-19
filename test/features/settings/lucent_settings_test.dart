@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucent/core/models/unlock_key.dart';
+import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
 import 'package:lucent/features/settings/model/lucent_settings.dart';
 
 void main() {
@@ -13,6 +14,31 @@ void main() {
       expect(s.backgroundColor, 0xFF000000);
       expect(s.autoStart, isFalse);
       expect(s.countdownSeconds, 0);
+      expect(s.cleaningMode, CleaningMode.full);
+      expect(s.guidedWipe, isFalse);
+    });
+
+    test('allowMouseMove follows guided-wipe only on supported modes', () {
+      const s = LucentSettings.defaults;
+      // Guided-wipe off -> frozen cursor.
+      expect(s.guidedWipeActive, isFalse);
+      expect(s.allowMouseMove, isFalse);
+
+      // Guided-wipe on, screen mode -> movement passes through.
+      final screen = s.copyWith(
+        guidedWipe: true,
+        cleaningMode: CleaningMode.screen,
+      );
+      expect(screen.guidedWipeActive, isTrue);
+      expect(screen.allowMouseMove, isTrue);
+
+      // Guided-wipe on but keyboard mode -> still frozen (unsupported).
+      final keyboard = s.copyWith(
+        guidedWipe: true,
+        cleaningMode: CleaningMode.keyboard,
+      );
+      expect(keyboard.guidedWipeActive, isFalse);
+      expect(keyboard.allowMouseMove, isFalse);
     });
 
     test('derived getters map raw fields to typed values', () {

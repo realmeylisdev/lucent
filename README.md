@@ -18,7 +18,7 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 |---|---|---|---|
 | Native keyboard + trackpad lock | ✅ builds/runs | ✅ builds in CI¹ | ✅ builds in CI¹ |
 | Hold-to-unlock (native gesture + progress ring) | ✅ | ✅¹ | ✅¹ |
-| Fullscreen black cleaning mode | ✅ | ✅ | ✅ |
+| Cleaning modes (Screen / Keyboard / Full) + countdown ring + guided wipe | ✅ | ✅ | ✅ |
 | Display Lab — 26 test patterns + dead/stuck-pixel fixer | ✅ | ✅ | ✅ |
 | Brightness boost (`screen_brightness`) | ✅ | ✅ | ⚠️ no-op (unsupported) |
 | Accessibility permission onboarding | ✅ | n/a | n/a |
@@ -53,7 +53,7 @@ lib/
     services/     MultiMonitorCover, Brightness, AutoStart, Hotkey, Tray
   features/
     home/         landing screen
-    cleaning/     fullscreen clean mode + cubit + unlock ring
+    cleaning/     modes (screen/keyboard/full) + countdown ring + guided-wipe
     display_lab/  26 test patterns (8 categories) + dead/stuck-pixel fixer
     settings/     persisted settings cubit + repository + model
     accessibility/ macOS permission onboarding
