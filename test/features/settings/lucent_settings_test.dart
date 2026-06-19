@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucent/core/models/unlock_key.dart';
 import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
@@ -49,6 +50,17 @@ void main() {
 
       final timed = s.copyWith(countdownSeconds: 30);
       expect(timed.hasCountdown, isTrue);
+    });
+
+    test('themeMode defaults to system and maps to ThemeMode', () {
+      const s = LucentSettings.defaults;
+      expect(s.themeMode, 'system');
+      expect(s.themeModeEnum, ThemeMode.system);
+
+      expect(s.copyWith(themeMode: 'light').themeModeEnum, ThemeMode.light);
+      expect(s.copyWith(themeMode: 'dark').themeModeEnum, ThemeMode.dark);
+      // Unknown tokens fall back to system.
+      expect(s.copyWith(themeMode: 'garbage').themeModeEnum, ThemeMode.system);
     });
 
     test('copyWith changes only the named field', () {

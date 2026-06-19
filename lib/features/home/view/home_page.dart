@@ -35,13 +35,14 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final accessibility = context.watch<AccessibilityCubit>().state;
     final canClean = accessibility.isGranted;
+    final cs = Theme.of(context).colorScheme;
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: RadialGradient(
-          center: Alignment(0, -0.85),
+          center: const Alignment(0, -0.85),
           radius: 1.3,
-          colors: [Color(0xFF1B2138), Color(0xFF0E0F13)],
+          colors: [cs.surfaceContainerHigh, cs.surface],
         ),
       ),
       child: Scaffold(
@@ -58,20 +59,24 @@ class HomePage extends StatelessWidget {
                   children: [
                     const Center(child: _BrandMark()),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Lucent',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'Lock the keyboard and wipe your screen in peace.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white60, fontSize: 15),
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     const _BlocksRow(items: _blocks),
@@ -139,7 +144,7 @@ class _BrandMark extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6C8CFF).withValues(alpha: 0.35),
+            color: const Color(0xFF6C8CFF).withValues(alpha: 0.25),
             blurRadius: 28,
             spreadRadius: -4,
           ),
@@ -159,20 +164,21 @@ class _BlocksRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Wrap(
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 6,
       runSpacing: 6,
       children: [
-        const Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.lock_outline, size: 14, color: Colors.white38),
-            SizedBox(width: 4),
+            Icon(Icons.lock_outline, size: 14, color: cs.onSurfaceVariant),
+            const SizedBox(width: 4),
             Text(
               'Locks',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
             ),
           ],
         ),
@@ -189,16 +195,17 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: cs.onSurface.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white70, fontSize: 12),
+        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
       ),
     );
   }

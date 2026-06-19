@@ -27,6 +27,7 @@ class SettingsRepository {
   static const _kPixelFixerRegionWidth = 'pixel_fixer_region_width';
   static const _kPixelFixerRegionHeight = 'pixel_fixer_region_height';
   static const _kPixelFixerAutoStopMinutes = 'pixel_fixer_auto_stop_minutes';
+  static const _kThemeMode = 'theme_mode';
 
   LucentSettings _cache = LucentSettings.defaults;
 
@@ -81,6 +82,8 @@ class SettingsRepository {
       pixelFixerAutoStopMinutes:
           _prefs.getInt(_kPixelFixerAutoStopMinutes) ??
           LucentSettings.defaults.pixelFixerAutoStopMinutes,
+      themeMode:
+          _prefs.getString(_kThemeMode) ?? LucentSettings.defaults.themeMode,
     );
   }
 
@@ -117,5 +120,6 @@ class SettingsRepository {
       _kPixelFixerAutoStopMinutes,
       settings.pixelFixerAutoStopMinutes,
     );
+    await _prefs.setString(_kThemeMode, settings.themeMode);
   }
 }

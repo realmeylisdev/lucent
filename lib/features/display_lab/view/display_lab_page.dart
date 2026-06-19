@@ -23,12 +23,13 @@ class DisplayLabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: RadialGradient(
-          center: Alignment(0, -0.85),
+          center: const Alignment(0, -0.85),
           radius: 1.3,
-          colors: [Color(0xFF1B2138), Color(0xFF0E0F13)],
+          colors: [cs.surfaceContainerHigh, cs.surface],
         ),
       ),
       child: Scaffold(

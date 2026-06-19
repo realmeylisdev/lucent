@@ -51,6 +51,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> setHotkey(String value) =>
       _persist(_repository.value.copyWith(hotkey: value));
 
+  /// Persist the app theme preference ('system' | 'light' | 'dark').
+  Future<void> setThemeMode(String token) =>
+      _persist(_repository.value.copyWith(themeMode: token));
+
   Future<void> setCleaningMode(CleaningMode mode) =>
       _persist(_repository.value.copyWith(cleaningMode: mode));
 

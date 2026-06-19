@@ -98,7 +98,11 @@ class NativeLockController {
     required bool allowMouseMove,
   }) async {
     await _method.invokeMethod<bool>(LucentMethods.configureUnlockGesture, {
-      'gesture': unlockKey == UnlockKey.space ? 'holdSpace' : 'holdEsc',
+      'gesture': switch (unlockKey) {
+        UnlockKey.space => 'holdSpace',
+        UnlockKey.either => 'holdEscOrSpace',
+        UnlockKey.escape => 'holdEsc',
+      },
       'holdDurationMs': unlockHoldDuration.inMilliseconds,
       'requireKeyUpReset': true,
     });

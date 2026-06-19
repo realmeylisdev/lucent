@@ -29,12 +29,15 @@ class AccessibilityCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Lucent uses a system-level input lock to swallow keystrokes '
               '(Cmd-Q, Cmd-Tab, fn, media keys) while you clean. macOS '
               'requires you to grant Accessibility access. Lucent ships '
               'outside the App Store specifically so this is possible.',
-              style: TextStyle(color: Colors.white60, fontSize: 13),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 12),
             Row(

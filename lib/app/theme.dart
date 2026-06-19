@@ -32,4 +32,29 @@ abstract final class LucentTheme {
       ),
     );
   }
+
+  static ThemeData get light {
+    final scheme = ColorScheme.fromSeed(seedColor: seed);
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: const Color(0xFFF6F7FB),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
 }

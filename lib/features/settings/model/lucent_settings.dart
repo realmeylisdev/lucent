@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:lucent/core/models/unlock_key.dart';
 import 'package:lucent/features/cleaning/models/cleaning_mode.dart';
 
@@ -24,6 +25,7 @@ class LucentSettings extends Equatable {
     required this.pixelFixerRegionWidth,
     required this.pixelFixerRegionHeight,
     required this.pixelFixerAutoStopMinutes,
+    required this.themeMode,
   });
 
   static const defaults = LucentSettings(
@@ -46,6 +48,7 @@ class LucentSettings extends Equatable {
     pixelFixerRegionWidth: 200,
     pixelFixerRegionHeight: 200,
     pixelFixerAutoStopMinutes: 0, // 0 == AutoStopPreset.off.
+    themeMode: 'system', // 'system' | 'light' | 'dark'.
   );
 
   final String unlockKey;
@@ -79,7 +82,18 @@ class LucentSettings extends Equatable {
   /// Auto-stop preset in whole minutes (0 == off).
   final int pixelFixerAutoStopMinutes;
 
+  /// App theme preference token ('system' | 'light' | 'dark').
+  final String themeMode;
+
   UnlockKey get unlockKeyEnum => UnlockKey.fromToken(unlockKey);
+
+  /// Maps the persisted token to a [ThemeMode], defaulting to system.
+  ThemeMode get themeModeEnum => switch (themeMode) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
+
   Duration get unlockHoldDuration => Duration(milliseconds: unlockHoldMs);
   bool get hasCountdown => countdownSeconds > 0;
 
@@ -109,6 +123,7 @@ class LucentSettings extends Equatable {
     int? pixelFixerRegionWidth,
     int? pixelFixerRegionHeight,
     int? pixelFixerAutoStopMinutes,
+    String? themeMode,
   }) {
     return LucentSettings(
       unlockKey: unlockKey ?? this.unlockKey,
@@ -134,6 +149,7 @@ class LucentSettings extends Equatable {
           pixelFixerRegionHeight ?? this.pixelFixerRegionHeight,
       pixelFixerAutoStopMinutes:
           pixelFixerAutoStopMinutes ?? this.pixelFixerAutoStopMinutes,
+      themeMode: themeMode ?? this.themeMode,
     );
   }
 
@@ -158,5 +174,6 @@ class LucentSettings extends Equatable {
     pixelFixerRegionWidth,
     pixelFixerRegionHeight,
     pixelFixerAutoStopMinutes,
+    themeMode,
   ];
 }

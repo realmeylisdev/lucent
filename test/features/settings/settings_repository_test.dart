@@ -79,6 +79,18 @@ void main() {
       expect(loaded.pixelFixerAutoStopMinutes, 0);
     });
 
+    test('round-trips themeMode through prefs', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repo = SettingsRepository(prefs);
+
+      expect((await repo.load()).themeMode, 'system');
+      await repo.save(LucentSettings.defaults.copyWith(themeMode: 'dark'));
+
+      final reloaded = await SettingsRepository(prefs).load();
+      expect(reloaded.themeMode, 'dark');
+    });
+
     test('preserves the other settings across a round-trip', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();

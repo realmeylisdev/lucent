@@ -116,8 +116,27 @@ class _AppShellState extends State<AppShell> {
     await windowManager.destroy();
   }
 
+  /// Re-register the global hotkey live after the user changes it in settings.
+  Future<void> _reregisterHotkey(String spec) async {
+    final hotkeys = _hotkeys;
+    if (hotkeys == null) return; // Chrome not activated yet.
+    final hotKey = parseHotKey(spec);
+    if (hotKey == null) {
+      await hotkeys.unregister();
+      return;
+    }
+    await hotkeys.register(hotKey, onPressed: _startCleaning);
+  }
+
   @override
-  Widget build(BuildContext context) => const HomePage();
+  Widget build(BuildContext context) {
+    return BlocListener<SettingsCubit, SettingsState>(
+      listenWhen: (prev, curr) => prev.settings.hotkey != curr.settings.hotkey,
+      listener: (context, state) =>
+          unawaited(_reregisterHotkey(state.settings.hotkey)),
+      child: const HomePage(),
+    );
+  }
 }
 
 /// Parses a hotkey spec like `ctrl+alt+l` into a [HotKey], or null if invalid.
@@ -147,4 +166,27 @@ HotKey? parseHotKey(String spec) {
   }
   if (key == null) return null;
   return HotKey(key: key, modifiers: modifiers.isEmpty ? null : modifiers);
+}
+
+/// Serializes a [HotKey] back to the `ctrl+alt+l` token format consumed by
+/// [parseHotKey]. The strict inverse: modifiers emit in a canonical order
+/// (ctrl, alt, shift, cmd) and the single a-z letter key comes last.
+///
+/// Returns null when the recorded combo has no single a-z letter key (e.g.
+/// modifiers-only, F-keys, digits) — [parseHotKey] cannot round-trip those, so
+/// the UI uses the null to reject the combo.
+String? formatHotKey(HotKey hotKey) {
+  final modifiers = hotKey.modifiers ?? const <HotKeyModifier>[];
+  final parts = <String>[];
+  // Emit in a fixed canonical order so the token is stable across record
+  // cycles regardless of the order the recorder reported the modifiers in.
+  if (modifiers.contains(HotKeyModifier.control)) parts.add('ctrl');
+  if (modifiers.contains(HotKeyModifier.alt)) parts.add('alt');
+  if (modifiers.contains(HotKeyModifier.shift)) parts.add('shift');
+  if (modifiers.contains(HotKeyModifier.meta)) parts.add('cmd');
+  // capsLock / fn are unsupported by parseHotKey and intentionally dropped.
+  final offset = hotKey.physicalKey.usbHidUsage - 0x00070004; // keyA == 0.
+  if (offset < 0 || offset > 25) return null;
+  parts.add(String.fromCharCode(0x61 + offset)); // a-z.
+  return parts.join('+');
 }

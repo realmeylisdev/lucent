@@ -72,11 +72,15 @@ class LucentApp extends StatelessWidget {
             ),
           ),
         ],
-        child: MaterialApp(
-          title: 'Lucent',
-          debugShowCheckedModeBanner: false,
-          theme: LucentTheme.dark,
-          home: const AppShell(),
+        child: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) => MaterialApp(
+            title: 'Lucent',
+            debugShowCheckedModeBanner: false,
+            theme: LucentTheme.light,
+            darkTheme: LucentTheme.dark,
+            themeMode: state.settings.themeModeEnum,
+            home: const AppShell(),
+          ),
         ),
       ),
     );

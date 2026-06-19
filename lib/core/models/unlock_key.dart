@@ -4,7 +4,8 @@
 /// to the platform key code it watches for inside the event tap.
 enum UnlockKey {
   escape('escape', 'Esc'),
-  space('space', 'Space');
+  space('space', 'Space'),
+  either('either', 'Esc or Space');
 
   const UnlockKey(this.token, this.label);
 

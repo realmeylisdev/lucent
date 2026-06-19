@@ -22,7 +22,8 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Display Lab — 26 test patterns + dead/stuck-pixel fixer | ✅ | ✅ | ✅ |
 | Brightness boost (`screen_brightness`) | ✅ | ✅ | ⚠️ no-op (unsupported) |
 | Accessibility permission onboarding | ✅ | n/a | n/a |
-| Settings (persisted) | ✅ | ✅ | ✅ |
+| Settings (grouped) + press-to-record hotkey | ✅ | ✅ | ✅ |
+| Light / Dark / System theme | ✅ | ✅ | ✅ |
 | Multi-monitor **visual** blackout | ✅ native | ✅ native² | ✅ native² |
 | Menu-bar / tray + global hotkey | ✅ | ✅³ | ✅³ |
 
