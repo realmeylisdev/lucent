@@ -1,0 +1,177 @@
+name: Release
+
+# Cut a release by pushing a tag: `git tag v1.0.0 && git push origin v1.0.0`.
+# Each platform job builds a downloadable artifact; the final `release` job
+# gathers them into a DRAFT GitHub Release (nothing is published until the
+# maintainer clicks "Publish" in the GitHub UI).
+#
+# All build jobs SUCCEED with no secrets configured. The macOS job signs and
+# notarizes ONLY when the Apple secrets exist; otherwise it ships an unsigned
+# (ad-hoc) DMG and logs how users can run it.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: 3.44.0
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # macOS: build .app, package a DMG, conditionally sign + notarize + staple.
+  # ---------------------------------------------------------------------------
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS (release)
+        run: flutter build macos --release
+
+      # GitHub does not allow secrets in job-level `if:`. Instead we expose each
+      # secret as an env var and let the packaging script branch on whether the
+      # signing identity is present. The script always exits 0 and always
+      # produces dist/lucent-macos.dmg.
+      - name: Package + (conditionally) sign & notarize DMG
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+          MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          AC_API_KEY_ID: ${{ secrets.AC_API_KEY_ID }}
+          AC_API_ISSUER_ID: ${{ secrets.AC_API_ISSUER_ID }}
+          AC_API_KEY_BASE64: ${{ secrets.AC_API_KEY_BASE64 }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: bash scripts/package_macos.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lucent-macos-dmg
+          path: dist/lucent-macos.dmg
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Windows: build, zip the Release runner folder. (Signing not configured.)
+  # ---------------------------------------------------------------------------
+  build-windows:
+    name: Build Windows zip
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - name: Package Windows zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $release = "build\windows\x64\runner\Release"
+          if (-not (Test-Path $release)) {
+            Write-Error "Expected build output not found at $release"
+            exit 1
+          }
+          Compress-Archive -Path "$release\*" -DestinationPath "dist\lucent-windows-x64.zip" -Force
+          Get-ChildItem dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lucent-windows-zip
+          path: dist/lucent-windows-x64.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Linux: install native deps (mirrors CI), build, tar.gz the bundle.
+  # ---------------------------------------------------------------------------
+  build-linux:
+    name: Build Linux tar.gz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libx11-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libwayland-bin \
+            libkeybinder-3.0-dev libayatana-appindicator3-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux (release)
+        run: flutter build linux --release
+
+      - name: Package Linux tar.gz
+        run: |
+          mkdir -p dist
+          bundle="build/linux/x64/release/bundle"
+          if [ ! -d "$bundle" ]; then
+            echo "Expected build output not found at $bundle" >&2
+            exit 1
+          fi
+          tar -czf dist/lucent-linux-x64.tar.gz -C "$bundle" .
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lucent-linux-targz
+          path: dist/lucent-linux-x64.tar.gz
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Release: collect every artifact and create a DRAFT GitHub Release.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Draft GitHub Release
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: find artifacts -type f -print
+
+      # Only create a release for an actual tag. A manual workflow_dispatch on a
+      # branch still builds + uploads the artifacts above (useful for testing),
+      # but skips release creation since action-gh-release needs a tag.
+      - name: Create draft release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          tag_name: ${{ github.ref_name }}
+          files: |
+            artifacts/lucent-macos-dmg/lucent-macos.dmg
+            artifacts/lucent-windows-zip/lucent-windows-x64.zip
+            artifacts/lucent-linux-targz/lucent-linux-x64.tar.gz
