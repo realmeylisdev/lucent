@@ -52,10 +52,6 @@ class CleaningCubit extends Cubit<CleaningState> {
       ),
     );
 
-    // Listen to native unlock events BEFORE the lock engages so no progress is
-    // missed.
-    _eventSub = _nativeLock.events.listen(_onNativeEvent);
-
     if (settings.brightnessBoost) {
       await _brightness.boostToMax();
     }
@@ -68,15 +64,46 @@ class CleaningCubit extends Cubit<CleaningState> {
         .padLeft(6, '0');
     await _monitorCover.coverSecondaryDisplays(backgroundColorHex: '#$rgb');
 
-    await _nativeLock.startLock(
+    final engaged = await _nativeLock.startLock(
       unlockKey: settings.unlockKeyEnum,
       unlockHoldDuration: settings.unlockHoldDuration,
       lockPointer: settings.pointerLock,
       allowMouseMove: settings.allowMouseMove,
     );
 
+    // CRITICAL: if the lock did not engage, the native hook is NOT swallowing
+    // keys — there is no working unlock and the user would be trapped on a
+    // black fullscreen. Abort: tear everything back down and surface the
+    // failure so the home screen can tell the user what to do.
+    if (!engaged) {
+      await _teardown();
+      emit(
+        const CleaningState(
+          status: CleaningStatus.failed,
+          errorMessage:
+              'Could not lock input. Grant Accessibility '
+              'permission and try again.',
+        ),
+      );
+      return;
+    }
+
+    // Lock engaged — subscribe to native unlock events now. Subscribing only
+    // after a successful engage means the abort path above can never race with
+    // an incoming event (and unlock progress only fires once the user holds the
+    // key, well after this point, so nothing is missed).
+    _eventSub = _nativeLock.events.listen(_onNativeEvent);
+
     if (settings.hasCountdown) {
       _startCountdown();
+    }
+  }
+
+  /// Clear a [CleaningStatus.failed] state back to idle so the home banner
+  /// does not re-fire. Safe to call when not failed (no-op).
+  void acknowledgeFailure() {
+    if (state.status == CleaningStatus.failed) {
+      emit(const CleaningState.idle());
     }
   }
 
@@ -115,7 +142,15 @@ class CleaningCubit extends Cubit<CleaningState> {
   /// End the session and release every lock/cover together.
   Future<void> stop() async {
     if (state.status == CleaningStatus.idle) return;
+    await _teardown();
+    emit(const CleaningState.idle());
+  }
 
+  /// Release every lock/cover/window override and cancel subs/timers, in the
+  /// reverse order they were applied. Each collaborator already swallows its
+  /// own platform errors, so this always completes — it is the single recovery
+  /// path shared by [stop] and the lock-failure abort in [start].
+  Future<void> _teardown() async {
     _countdownTimer?.cancel();
     _countdownTimer = null;
 
@@ -127,8 +162,6 @@ class CleaningCubit extends Cubit<CleaningState> {
 
     await _eventSub?.cancel();
     _eventSub = null;
-
-    emit(const CleaningState.idle());
   }
 
   @override

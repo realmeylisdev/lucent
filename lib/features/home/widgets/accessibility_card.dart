@@ -40,13 +40,15 @@ class AccessibilityCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 FilledButton(
                   onPressed: cubit.openSettings,
                   child: const Text('Open System Settings'),
                 ),
-                const SizedBox(width: 8),
                 TextButton(
                   onPressed: cubit.refresh,
                   child: const Text('Re-check'),

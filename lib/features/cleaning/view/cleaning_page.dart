@@ -29,7 +29,8 @@ class CleaningPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<CleaningCubit, CleaningState>(
       listenWhen: (prev, next) =>
-          prev.status != next.status && next.status == CleaningStatus.idle,
+          prev.status == CleaningStatus.cleaning &&
+          next.status != CleaningStatus.cleaning,
       listener: (context, state) {
         // Session ended (unlock / countdown / failure): pop back home.
         if (Navigator.of(context).canPop()) {

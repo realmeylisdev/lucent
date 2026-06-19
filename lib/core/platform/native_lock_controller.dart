@@ -91,45 +91,86 @@ class NativeLockController {
   /// When [lockPointer] && [allowMouseMove], clicks/scroll stay swallowed but
   /// bare cursor MOVEMENT reaches Flutter (macOS honors this; Windows/Linux may
   /// ignore it and keep the cursor frozen — degrade gracefully, no error).
+  ///
+  /// Returns `true` ONLY when the native tap actually engaged. Any failure —
+  /// a thrown [PlatformException], a [MissingPluginException] (no native
+  /// implementation), or the native side reporting `engaged == false/null` —
+  /// returns `false` so the caller can abort cleanly instead of softlocking on
+  /// a black screen with no working unlock.
   Future<bool> startLock({
     required UnlockKey unlockKey,
     required Duration unlockHoldDuration,
     required bool lockPointer,
     required bool allowMouseMove,
   }) async {
-    await _method.invokeMethod<bool>(LucentMethods.configureUnlockGesture, {
-      'gesture': switch (unlockKey) {
-        UnlockKey.space => 'holdSpace',
-        UnlockKey.either => 'holdEscOrSpace',
-        UnlockKey.escape => 'holdEsc',
-      },
-      'holdDurationMs': unlockHoldDuration.inMilliseconds,
-      'requireKeyUpReset': true,
-    });
-    final engaged = await _method.invokeMethod<bool>(LucentMethods.lock, {
-      'swallowPointer': lockPointer,
-      'allowMouseMove': allowMouseMove,
-      'displayIds': <String>[],
-    });
-    return engaged ?? false;
+    try {
+      await _method.invokeMethod<bool>(LucentMethods.configureUnlockGesture, {
+        'gesture': switch (unlockKey) {
+          UnlockKey.space => 'holdSpace',
+          UnlockKey.either => 'holdEscOrSpace',
+          UnlockKey.escape => 'holdEsc',
+        },
+        'holdDurationMs': unlockHoldDuration.inMilliseconds,
+        'requireKeyUpReset': true,
+      });
+      final engaged = await _method.invokeMethod<bool>(LucentMethods.lock, {
+        'swallowPointer': lockPointer,
+        'allowMouseMove': allowMouseMove,
+        'displayIds': <String>[],
+      });
+      return engaged ?? false;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
   }
 
   /// Release the native input lock (app-initiated, e.g. timer end / quit).
-  Future<void> stopLock() => _method.invokeMethod<bool>(
-    LucentMethods.unlock,
-    {'reason': 'programmatic'},
-  );
+  ///
+  /// Swallows channel errors so teardown ALWAYS completes — even if the native
+  /// side is gone or never installed the plugin.
+  Future<void> stopLock() async {
+    try {
+      await _method.invokeMethod<bool>(LucentMethods.unlock, {
+        'reason': 'programmatic',
+      });
+    } on MissingPluginException {
+      // Nothing to release.
+    } on PlatformException {
+      // Best-effort; never block teardown.
+    }
+  }
 
   /// macOS: whether Accessibility / Input-Monitoring is granted. Other
   /// platforms report `notRequired` and therefore resolve to `true`.
+  ///
+  /// Fails safe: any channel error resolves to `false` so the UI keeps Start
+  /// disabled / shows the accessibility card rather than letting a doomed lock
+  /// attempt proceed into the softlock.
   Future<bool> isAccessibilityTrusted() async {
-    final status = await _method.invokeMethod<String>(
-      LucentMethods.checkPermission,
-    );
-    return status == 'granted' || status == 'notRequired';
+    try {
+      final status = await _method.invokeMethod<String>(
+        LucentMethods.checkPermission,
+      );
+      return status == 'granted' || status == 'notRequired';
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
   }
 
   /// macOS: prompt + open System Settings > Privacy & Security > Accessibility.
-  Future<void> openAccessibilitySettings() =>
-      _method.invokeMethod<void>(LucentMethods.requestPermission);
+  ///
+  /// Best-effort: a missing handler must not crash the home screen.
+  Future<void> openAccessibilitySettings() async {
+    try {
+      await _method.invokeMethod<void>(LucentMethods.requestPermission);
+    } on MissingPluginException {
+      // No native implementation; nothing to open.
+    } on PlatformException {
+      // Best-effort.
+    }
+  }
 }

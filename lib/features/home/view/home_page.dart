@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucent/features/about/view/about_page.dart';
 import 'package:lucent/features/accessibility/cubit/accessibility_cubit.dart';
 import 'package:lucent/features/cleaning/cubit/cleaning_cubit.dart';
 import 'package:lucent/features/cleaning/view/cleaning_page.dart';
@@ -24,10 +25,13 @@ class HomePage extends StatelessWidget {
   ];
 
   Future<void> _startCleaning(BuildContext context) async {
-    final settings = context.read<SettingsCubit>().state.settings;
-    await context.read<CleaningCubit>().start(settings);
-    if (context.mounted) {
-      await Navigator.of(context).push(CleaningPage.route());
+    final cubit = context.read<CleaningCubit>();
+    final navigator = Navigator.of(context);
+    await cubit.start(context.read<SettingsCubit>().state.settings);
+    // Only show the black cleaning surface if the lock actually engaged; if it
+    // aborted (status == failed) the home BlocListener shows the SnackBar.
+    if (cubit.state.status == CleaningStatus.cleaning) {
+      await navigator.push(CleaningPage.route());
     }
   }
 
@@ -37,85 +41,103 @@ class HomePage extends StatelessWidget {
     final canClean = accessibility.isGranted;
     final cs = Theme.of(context).colorScheme;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.85),
-          radius: 1.3,
-          colors: [cs.surfaceContainerHigh, cs.surface],
+    return BlocListener<CleaningCubit, CleaningState>(
+      listenWhen: (prev, next) => next.status == CleaningStatus.failed,
+      listener: (context, state) {
+        final message = state.errorMessage;
+        if (message != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(message)));
+        }
+        context.read<CleaningCubit>().acknowledgeFailure();
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -0.85),
+            radius: 1.3,
+            colors: [cs.surfaceContainerHigh, cs.surface],
+          ),
         ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Center(
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
-              child: Padding(
-                padding: const EdgeInsets.all(36),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Center(child: _BrandMark()),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Lucent',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
-                        color: cs.onSurface,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Padding(
+                  padding: const EdgeInsets.all(36),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Center(child: _BrandMark()),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Lucent',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                          color: cs.onSurface,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Lock the keyboard and wipe your screen in peace.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 15,
+                      const SizedBox(height: 6),
+                      Text(
+                        'Lock the keyboard and wipe your screen in peace.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    const _BlocksRow(items: _blocks),
-                    const SizedBox(height: 28),
-                    if (accessibility.needsGrant) ...[
-                      const AccessibilityCard(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
+                      const _BlocksRow(items: _blocks),
+                      const SizedBox(height: 28),
+                      if (accessibility.needsGrant) ...[
+                        const AccessibilityCard(),
+                        const SizedBox(height: 16),
+                      ],
+                      BlocBuilder<SettingsCubit, SettingsState>(
+                        builder: (context, state) => CleaningModeSelector(
+                          value: state.settings.cleaningMode,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .setCleaningMode,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: canClean
+                            ? () => _startCleaning(context)
+                            : null,
+                        icon: const Icon(Icons.cleaning_services_outlined),
+                        label: const Text('Start Cleaning'),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).push(DisplayLabPage.route()),
+                        icon: const Icon(Icons.tune),
+                        label: const Text('Display Lab'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).push(SettingsPage.route()),
+                        icon: const Icon(Icons.settings_outlined),
+                        label: const Text('Settings'),
+                      ),
+                      TextButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).push(AboutPage.route()),
+                        icon: const Icon(Icons.info_outline),
+                        label: const Text('About'),
+                      ),
                     ],
-                    BlocBuilder<SettingsCubit, SettingsState>(
-                      builder: (context, state) => CleaningModeSelector(
-                        value: state.settings.cleaningMode,
-                        onChanged: context
-                            .read<SettingsCubit>()
-                            .setCleaningMode,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: canClean
-                          ? () => _startCleaning(context)
-                          : null,
-                      icon: const Icon(Icons.cleaning_services_outlined),
-                      label: const Text('Start Cleaning'),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () =>
-                          Navigator.of(context).push(DisplayLabPage.route()),
-                      icon: const Icon(Icons.tune),
-                      label: const Text('Display Lab'),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: () =>
-                          Navigator.of(context).push(SettingsPage.route()),
-                      icon: const Icon(Icons.settings_outlined),
-                      label: const Text('Settings'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

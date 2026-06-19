@@ -55,4 +55,49 @@ void main() {
       expect(UnlockKey.either.label, 'Esc or Space');
     });
   });
+
+  group('NativeLockController defensive paths', () {
+    const channel = MethodChannel(LucentChannels.method);
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final controller = NativeLockController();
+
+    Future<bool> start() => controller.startLock(
+      unlockKey: UnlockKey.escape,
+      unlockHoldDuration: const Duration(milliseconds: 2500),
+      lockPointer: true,
+      allowMouseMove: false,
+    );
+
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    test('startLock is false when lock reports not engaged', () async {
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async => call.method != LucentMethods.lock,
+      );
+      expect(await start(), isFalse);
+    });
+
+    test('startLock is false on a PlatformException', () async {
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async => throw PlatformException(code: 'boom'),
+      );
+      expect(await start(), isFalse);
+    });
+
+    test('startLock is false when the plugin is missing', () async {
+      messenger.setMockMethodCallHandler(channel, null);
+      expect(await start(), isFalse);
+    });
+
+    test('isAccessibilityTrusted fails safe to false on error', () async {
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async => throw PlatformException(code: 'boom'),
+      );
+      expect(await controller.isAccessibilityTrusted(), isFalse);
+    });
+  });
 }

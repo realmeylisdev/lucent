@@ -1,6 +1,8 @@
 part of 'cleaning_cubit.dart';
 
-enum CleaningStatus { idle, cleaning }
+/// idle = no session; cleaning = lock engaged; failed = lock could not engage
+/// (aborted + torn down, [CleaningState.errorMessage] surfaces why).
+enum CleaningStatus { idle, cleaning, failed }
 
 /// Immutable cleaning-session state.
 class CleaningState extends Equatable {
@@ -15,6 +17,7 @@ class CleaningState extends Equatable {
     this.gridColumns = 0,
     this.gridRows = 0,
     this.coveredCells = const <int>{},
+    this.errorMessage,
   });
 
   const CleaningState.idle()
@@ -27,10 +30,14 @@ class CleaningState extends Equatable {
       guidedWipe = false,
       gridColumns = 0,
       gridRows = 0,
-      coveredCells = const <int>{};
+      coveredCells = const <int>{},
+      errorMessage = null;
 
   final CleaningStatus status;
   final int backgroundColor;
+
+  /// User-facing reason the session failed to start, or null when not failed.
+  final String? errorMessage;
 
   /// 0..1 progress of the native-detected unlock hold gesture.
   final double unlockProgress;
@@ -56,6 +63,9 @@ class CleaningState extends Equatable {
 
   bool get isCleaning => status == CleaningStatus.cleaning;
 
+  /// Whether the last start attempt aborted before engaging the lock.
+  bool get failed => status == CleaningStatus.failed;
+
   int get _cellCount => gridColumns * gridRows;
 
   /// 0..1 fraction of cells wiped. 0 when there is no grid.
@@ -78,6 +88,7 @@ class CleaningState extends Equatable {
     int? gridColumns,
     int? gridRows,
     Set<int>? coveredCells,
+    String? errorMessage,
   }) {
     return CleaningState(
       status: status ?? this.status,
@@ -90,6 +101,7 @@ class CleaningState extends Equatable {
       gridColumns: gridColumns ?? this.gridColumns,
       gridRows: gridRows ?? this.gridRows,
       coveredCells: coveredCells ?? this.coveredCells,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
@@ -105,5 +117,6 @@ class CleaningState extends Equatable {
     gridColumns,
     gridRows,
     coveredCells,
+    errorMessage,
   ];
 }

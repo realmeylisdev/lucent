@@ -24,6 +24,7 @@ the limit the OS allows) and the user can only leave by performing a deliberate
 | Accessibility permission onboarding | ✅ | n/a | n/a |
 | Settings (grouped) + press-to-record hotkey | ✅ | ✅ | ✅ |
 | Light / Dark / System theme | ✅ | ✅ | ✅ |
+| About / help screen | ✅ | ✅ | ✅ |
 | Multi-monitor **visual** blackout | ✅ native | ✅ native² | ✅ native² |
 | Menu-bar / tray + global hotkey | ✅ | ✅³ | ✅³ |
 
@@ -38,9 +39,10 @@ restricted). Build-verified on all three via CI; runtime-verified on macOS.
 / Display Lab / Settings / Quit) and a global start-cleaning hotkey. Verified on
 macOS; Windows/Linux pending an on-platform check.
 
-macOS builds & runs; `flutter analyze` is clean under `very_good_analysis`; unit
-tests pass; CI builds **all three desktop platforms** (macOS, Windows, Linux) and
-runs analyze + tests on every push.
+macOS builds & runs; `flutter analyze` is clean under `very_good_analysis`; 99
+unit/widget tests pass (plus macOS-guarded golden tests for the painters); CI
+builds **all three desktop platforms** (macOS, Windows, Linux) and runs analyze +
+tests on every push.
 
 ## Architecture (VGV, feature-first)
 
@@ -58,6 +60,7 @@ lib/
     display_lab/  26 test patterns (8 categories) + dead/stuck-pixel fixer
     settings/     persisted settings cubit + repository + model
     accessibility/ macOS permission onboarding
+    about/        app version + GitHub link + license
 ```
 
 State: `flutter_bloc` cubits, immutable `Equatable` states, constructor DI.
