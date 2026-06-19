@@ -36,6 +36,7 @@
 #include "input_lock_plugin.h"
 
 #include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
 #include <glib.h>
 
 #include <cstring>

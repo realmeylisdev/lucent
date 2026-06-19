@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
-project(runner LANGUAGES CXX)
+# C is enabled so the generated Wayland protocol glue (.c) compiles as C.
+project(runner LANGUAGES CXX C)
 
 # === Lucent: native input-lock dependencies ===
 # X11 for XGrabKeyboard/XGrabPointer, xkbcommon for keysym handling, and the
