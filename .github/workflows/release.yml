@@ -2,8 +2,7 @@ name: Release
 
 # Cut a release by pushing a tag: `git tag v1.0.0 && git push origin v1.0.0`.
 # Each platform job builds a downloadable artifact; the final `release` job
-# gathers them into a DRAFT GitHub Release (nothing is published until the
-# maintainer clicks "Publish" in the GitHub UI).
+# gathers them into a published GitHub Release immediately.
 #
 # All build jobs SUCCEED with no secrets configured. The macOS job signs and
 # notarizes ONLY when the Apple secrets exist; otherwise it ships an unsigned
@@ -163,11 +162,11 @@ jobs:
       # Only create a release for an actual tag. A manual workflow_dispatch on a
       # branch still builds + uploads the artifacts above (useful for testing),
       # but skips release creation since action-gh-release needs a tag.
-      - name: Create draft release
+      - name: Create release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          draft: false
           generate_release_notes: true
           fail_on_unmatched_files: true
           tag_name: ${{ github.ref_name }}
